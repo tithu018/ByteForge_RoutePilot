@@ -101,3 +101,23 @@ include Prisma validation and generation, migration application, API
 compilation, and two consecutive seed runs to verify idempotency. Constraint
 and domain-service tests will be expanded in Phase 6 when allocation behavior
 is implemented.
+
+## Phase 6 capacity planning additions
+
+Phase 6 adds additive planning evidence without changing the meaning of existing
+orders, allocations or published plans:
+
+- `PlanValidation` records validation status and blocking/advisory findings for
+  a specific plan version. A later result does not overwrite earlier history.
+- `PlanCapacitySnapshot` captures vehicle capability, availability,
+  weight/volume limits and fuel reservation used during plan review. These are
+  snapshots, not mutable vehicle master data.
+- `CapacityPlanningScenario` stores explicitly sourced future-volume assumptions
+  by depot, brand and ISO week. The database rejects negative volumes and a
+  chilled volume greater than total volume. Synthetic fixtures use a
+  `DEMO-ILLUSTRATIVE-SCENARIO` source label and are not forecasts.
+
+The migration is additive and uses restrictive foreign keys. Existing Phase 3–5
+rows remain valid; deleting a referenced plan, vehicle, depot or brand is blocked
+while planning evidence exists. Feasibility rules such as refrigeration,
+delivery windows, route limits and fuel calculations remain service-layer rules.

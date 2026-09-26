@@ -42,6 +42,18 @@ enum PlanStatus {
   ARCHIVED
 }
 
+enum PlanValidationStatus {
+  NOT_RUN
+  PASSED
+  BLOCKED
+}
+
+enum IntakeRunStatus {
+  OPEN
+  CLOSED
+  ARCHIVED
+}
+
 enum AllocationStatus {
   SERVED
   DEFERRED
@@ -131,6 +143,7 @@ model Brand {
   updatedAt DateTime @updatedAt
   outlets   Outlet[]
   orders    Order[]
+  capacityScenarios CapacityPlanningScenario[]
 }
 
 model Depot {
@@ -143,6 +156,8 @@ model Depot {
   outlets   Outlet[]
   vehicles  Vehicle[]
   plans     Plan[]
+  intakeRuns IntakeRun[]
+  capacityScenarios CapacityPlanningScenario[]
 }
 
 model Outlet {
@@ -189,6 +204,7 @@ model Vehicle {
   homeDepot        Depot           @relation(fields: [homeDepotId], references: [id], onDelete: Restrict)
   trips            Trip[]
   fuelUsages       FuelUsage[]
+  capacitySnapshots PlanCapacitySnapshot[]
 
   @@index([homeDepotId])
   @@index([type, temperature])
@@ -218,17 +234,24 @@ model Order {
   sourceId              String
   status                OrderStatus     @default(DRAFT)
   submittedAt           DateTime?
+  confirmedAt           DateTime?
   requestedDeliveryDate DateTime        @db.Date
+  requestedWindowOpen   DateTime?       @db.Time(0)
+  requestedWindowClose  DateTime?       @db.Time(0)
+  accessRequirement     String?
+  mallWindow            String?
   temperature           TemperatureType
   units                 Int
   weightKg              Decimal         @db.Decimal(12, 3)
   volumeM3              Decimal         @db.Decimal(12, 3)
   outletId              String
   brandId               String
+  intakeRunId           String?
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
   outlet                Outlet          @relation(fields: [outletId], references: [id], onDelete: Restrict)
   brand                 Brand           @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  intakeRun             IntakeRun?      @relation(fields: [intakeRunId], references: [id], onDelete: Restrict)
   allocations           Allocation[]
   deferrals             Deferral[]
   planDecisions         PlanDecision[]
@@ -238,6 +261,25 @@ model Order {
   @@unique([sourceId, requestedDeliveryDate])
   @@index([outletId, requestedDeliveryDate])
   @@index([status, requestedDeliveryDate])
+  @@index([intakeRunId, status])
+}
+
+model IntakeRun {
+  id           String          @id @default(cuid())
+  sourceId     String          @unique
+  deliveryDate DateTime        @db.Date
+  sequence     Int             @default(1)
+  cutoffAt     DateTime
+  status       IntakeRunStatus @default(OPEN)
+  closedAt     DateTime?
+  depotId      String
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  depot        Depot           @relation(fields: [depotId], references: [id], onDelete: Restrict)
+  orders       Order[]
+
+  @@unique([depotId, deliveryDate, sequence])
+  @@index([deliveryDate, status])
 }
 
 model Plan {
@@ -255,9 +297,71 @@ model Plan {
   trips        Trip[]
   allocations  Allocation[]
   deferrals    Deferral[]
+  validations  PlanValidation[]
+  capacitySnapshots PlanCapacitySnapshot[]
 
   @@unique([depotId, deliveryDate, version])
   @@index([deliveryDate, status])
+}
+
+model PlanValidation {
+  id             String              @id @default(cuid())
+  planId         String
+  planVersion    Int
+  status         PlanValidationStatus @default(NOT_RUN)
+  blockingIssues Json?
+  advisoryIssues Json?
+  checkedAt      DateTime?
+  createdAt      DateTime            @default(now())
+  plan           Plan                @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@unique([planId, planVersion])
+  @@index([status, checkedAt])
+}
+
+model PlanCapacitySnapshot {
+  id               String          @id @default(cuid())
+  planId           String
+  vehicleId        String
+  vehicleType      VehicleType
+  temperature      TemperatureType
+  available        Boolean
+  tripCount        Int             @default(0)
+  weightCapacityKg Decimal         @db.Decimal(12, 3)
+  volumeCapacityM3 Decimal         @db.Decimal(12, 3)
+  weightUsedKg     Decimal         @default(0) @db.Decimal(12, 3)
+  volumeUsedM3     Decimal         @default(0) @db.Decimal(12, 3)
+  weeklyFuelQuotaL Decimal         @db.Decimal(12, 3)
+  reservedFuelL    Decimal?        @db.Decimal(12, 3)
+  capturedAt       DateTime        @default(now())
+  plan             Plan            @relation(fields: [planId], references: [id], onDelete: Restrict)
+  vehicle          Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+
+  @@unique([planId, vehicleId])
+  @@index([vehicleId, capturedAt])
+}
+
+model CapacityPlanningScenario {
+  id              String   @id @default(cuid())
+  depotId         String
+  brandId         String?
+  isoYear         Int
+  isoWeek         Int
+  horizonStart    DateTime @db.Date
+  horizonEnd      DateTime @db.Date
+  totalVolumeM3   Decimal  @db.Decimal(12, 3)
+  chilledVolumeM3 Decimal  @db.Decimal(12, 3)
+  sourceLabel     String
+  sourceRunDate   DateTime?
+  assumptions     Json?
+  note            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  depot           Depot    @relation(fields: [depotId], references: [id], onDelete: Restrict)
+  brand           Brand?   @relation(fields: [brandId], references: [id], onDelete: Restrict)
+
+  @@unique([depotId, brandId, isoYear, isoWeek])
+  @@index([isoYear, isoWeek])
 }
 
 model PlanDecision {

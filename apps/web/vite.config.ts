@@ -9,8 +9,19 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     envDir: root,
-    resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
-    server: { port: Number(env.WEB_PORT ?? 5173), strictPort: true, proxy: { '/api': { target: env.API_BASE_URL ?? 'http://localhost:3000', changeOrigin: true } } },
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '@waypoint/shared': fileURLToPath(new URL('../../packages/shared/src', import.meta.url)),
+      },
+    },
+    server: {
+      port: Number(env.WEB_PORT ?? 5173),
+      strictPort: true,
+      proxy: {
+        '/api': { target: env.API_BASE_URL ?? 'http://localhost:3000', changeOrigin: true },
+      },
+    },
     preview: { port: Number(env.WEB_PORT ?? 5173), strictPort: true },
   };
 });

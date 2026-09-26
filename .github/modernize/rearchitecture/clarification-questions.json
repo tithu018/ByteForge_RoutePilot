@@ -1,0 +1,486 @@
+{
+  "schema": "clarification-questions/v1",
+  "generated_at": "2026-09-26T00:00:00Z",
+  "user_input": "Continue the existing repository implementation from the current workspace state. The user requests completing the full system described in the attached MASTER IMPLEMENTATION PROMPT, phases 5 through 15, without recreating or discarding existing Phase 1-4 work. Work sequentially and conservatively. First inspect AGENTS.md, current git/worktree, README, design baseline, current Phase 3 schema and Phase 4 auth. Then implement as much as is genuinely possible in numerical order, starting with Phase 5. Preserve the modular NestJS monolith, strict TypeScript, approved design baseline, and competition dataset confidentiality. Use only clearly labelled DEMO-* synthetic data; do not access or invent official datasets. At the end of each phase run relevant formatting, lint, typecheck, tests, and builds, repairing failures. Do not claim incomplete phases are complete. If the full scope cannot be completed in this run, finish the highest-value next phase cleanly and leave a precise status of completed, incomplete, blocked, and external-action-required items. You may edit files and run commands. Return a concise final report with files changed, validations, and honest remaining status. Do not commit or create branches.\n\nClassification: brownfield in-place continuation, change_type=upgrade, grouping_needed=false.\nProject facts: TypeScript monorepo; NestJS modular monolith in apps/api; React/Vite frontend in apps/web; shared contracts and UI packages; approved design baseline under docs/design-baseline; existing Phase 1-4 implementation; frontend and backend both in scope; git repository present.\nFeasibility: feasible for incremental continuation, with scope risk because the referenced MASTER IMPLEMENTATION PROMPT is not present as a workspace file. Use the user request and existing artifacts as the scenario source; do not invent missing official requirements.\nWorking directory: .github/modernize/rearchitecture. Return only READY, NEEDS_INPUT, or BLOCKED token plus path/reason.",
+  "title": "Brownfield Phase 5-15 continuation",
+  "assessment_snapshot": {
+    "intro": "The continuation request identifies an existing full-stack TypeScript monorepo and a conservative in-place upgrade path, but several implementation-governing decisions are not explicit.",
+    "bullets": [
+      "NestJS modular monolith backend and React/Vite frontend are both in scope",
+      "Phase 1-4 work must be preserved and competition data must remain confidential",
+      "The referenced MASTER IMPLEMENTATION PROMPT is unavailable, so missing official requirements cannot be inferred",
+      "The request requires sequential validation and an honest completed/incomplete/blocked report"
+    ]
+  },
+  "proposed_outcome": "Continue the existing repository in place from Phase 5 onward, preserving current architecture, contracts, authentication, design baseline, and data confidentiality while implementing only requirements supported by the supplied request and existing artifacts.",
+  "scope": [
+    "frontend",
+    "backend",
+    "generic"
+  ],
+  "status": "answered",
+  "questions": [
+    {
+      "id": "F1",
+      "kit": "frontend",
+      "field": "target.framework",
+      "title": "Target frontend framework",
+      "question": "Which frontend framework and version should govern the continuation?",
+      "importance": "required",
+      "impact": 5,
+      "recommended": "Preserve the detected frontend stack",
+      "default": null,
+      "prefilled": true,
+      "prefilled_value": "React with Vite (existing stack)",
+      "answer": {
+        "value": "Preserve the detected frontend stack. Use the existing React + Vite versions already defined in the repository. Do not upgrade framework versions unless required to fix a verified compatibility/security issue",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "React with Vite (existing stack)",
+          "label": "React with Vite (existing stack)"
+        },
+        {
+          "value": "React (version to specify)",
+          "label": "React (version to specify)"
+        },
+        {
+          "value": "Preserve the detected frontend stack",
+          "label": "Preserve the detected frontend stack"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "F2",
+      "kit": "frontend",
+      "field": "target.component_library",
+      "title": "Component library",
+      "question": "Which component or UI library and version should Phase 5-15 frontend work use?",
+      "importance": "required",
+      "impact": 4,
+      "recommended": "Preserve the existing shared UI package and approved design baseline",
+      "default": null,
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "Preserve the existing shared UI package and approved Phase 1 design baseline. Use the existing shadcn/ui-compatible primitives and Radix dependencies already present in the repository; do not replace the component system.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "Preserve the existing shared UI package and approved design baseline",
+          "label": "Preserve the existing shared UI package and approved design baseline"
+        },
+        {
+          "value": "Radix UI",
+          "label": "Radix UI"
+        },
+        {
+          "value": "shadcn/ui",
+          "label": "shadcn/ui"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "F3",
+      "kit": "frontend",
+      "field": "visual.screenshots",
+      "title": "Current UI references",
+      "question": "What screenshots, recordings, or screen-reference artifacts should be treated as the source of truth for existing UI behavior and states?",
+      "importance": "required",
+      "impact": 4,
+      "recommended": null,
+      "default": null,
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "Treat the approved Phase 1 Design Baseline, the current implemented UI in the repository, existing design documentation, and any Phase 1 screenshots/prototypes stored in the project as the source of truth. If they conflict, the approved Phase 1 design specification takes priority. Do not invent UI behavior from external templates.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "F4",
+      "kit": "frontend",
+      "field": "visual.design_system",
+      "title": "Design system source",
+      "question": "Which design system or token source must the frontend continuation follow?",
+      "importance": "required",
+      "impact": 4,
+      "recommended": null,
+      "default": "match existing pixel-by-pixel using extracted CSS custom properties",
+      "prefilled": true,
+      "prefilled_value": "docs/design-baseline and the existing shared UI package",
+      "answer": {
+        "value": "docs/design-baseline and theUse the approved Phase 1 design system and the existing repository design tokens/shared UI package as the source of truth. Preserve typography, spacing, status semantics, component patterns, responsive behavior, and role-specific UX established there. existing shared UI package",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "F5",
+      "kit": "frontend",
+      "field": "compliance.accessibility",
+      "title": "Accessibility target",
+      "question": "Which accessibility standard should the frontend continuation target?",
+      "importance": "recommended",
+      "impact": 3,
+      "recommended": "WCAG 2.1 AA",
+      "default": "WCAG 2.1 AA",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "WCAG 2.1 AA",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "WCAG 2.1 AA",
+          "label": "WCAG 2.1 AA"
+        },
+        {
+          "value": "WCAG 2.2 AA",
+          "label": "WCAG 2.2 AA"
+        },
+        {
+          "value": "Preserve current accessibility behavior",
+          "label": "Preserve current accessibility behavior"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "F6",
+      "kit": "frontend",
+      "field": "compatibility.browsers",
+      "title": "Browser targets",
+      "question": "Which browser and runtime compatibility targets must be supported?",
+      "importance": "recommended",
+      "impact": 2,
+      "recommended": null,
+      "default": "modern evergreen (Chrome, Firefox, Safari, Edge - latest 2 major versions)",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "Support current evergreen desktop browsers: Chrome, Edge, Firefox, and Safari; and current mobile Chrome/Android and Safari/iOS. Prioritize Chromium-based judge environments while avoiding browser-specific implementations.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "F7",
+      "kit": "frontend",
+      "field": "responsive.breakpoints",
+      "title": "Responsive strategy",
+      "question": "What responsive and breakpoint strategy should govern frontend work?",
+      "importance": "recommended",
+      "impact": 2,
+      "recommended": null,
+      "default": "mobile-first using existing breakpoints detected from codebase",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "Preserve the existing responsive strategy. Dispatcher is desktop-first; Loader is tablet/mobile optimized; Driver is mobile-first; Store Manager supports mobile and desktop. Use the existing Tailwind breakpoints unless a verified UI issue requires adjustment. Do not simply shrink desktop tables on mobile.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "F8",
+      "kit": "frontend",
+      "field": "i18n.locales",
+      "title": "Locales",
+      "question": "Which locales are in scope for the continuation?",
+      "importance": "optional",
+      "impact": 1,
+      "recommended": null,
+      "default": "preserve current locales; keep existing i18n library if present",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "English only for the competition implementation. Keep user-facing strings structured so localization can be added later, but do not add multilingual scope now.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "F9",
+      "kit": "frontend",
+      "field": "state_mgmt.preference",
+      "title": "Client state",
+      "question": "Which client-side state management approach should be used?",
+      "importance": "optional",
+      "impact": 2,
+      "recommended": null,
+      "default": "preserve existing pattern if identifiable; otherwise recommend minimal (component state + server-state library)",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "Use TanStack Query for server state and React local state/useReducer for local UI state. Use React Hook Form for forms and Dexie/IndexedDB for offline driver persistence. Do not introduce Redux unless a later verified requirement proves it necessary.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "F10",
+      "kit": "frontend",
+      "field": "routing.preference",
+      "title": "Routing strategy",
+      "question": "Which routing library or URL strategy should govern the frontend continuation?",
+      "importance": "optional",
+      "impact": 2,
+      "recommended": null,
+      "default": "use the de-facto router for the chosen target framework",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "Preserve React Router and the current role-based URL structure. Maintain protected routes and role-aware navigation. Do not migrate routing frameworks.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "B1",
+      "kit": "backend",
+      "field": "target.framework",
+      "title": "Target backend framework",
+      "question": "Which backend framework and version should govern the continuation?",
+      "importance": "required",
+      "impact": 5,
+      "recommended": "NestJS (preserve existing modular monolith)",
+      "default": null,
+      "prefilled": true,
+      "prefilled_value": "NestJS modular monolith (version to verify)",
+      "answer": {
+        "value": "NestJS modular monolith (version toPreserve the existing NestJS modular monolith and the NestJS version already defined in the repository. Do not upgrade versions without a verified reason. verify)",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "NestJS (preserve existing modular monolith)",
+          "label": "NestJS (preserve existing modular monolith)"
+        },
+        {
+          "value": "NestJS (version to specify)",
+          "label": "NestJS (version to specify)"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "B2",
+      "kit": "backend",
+      "field": "api.contract_preservation",
+      "title": "API contract policy",
+      "question": "How strictly must existing API routes, payloads, and status codes be preserved during Phase 5-15?",
+      "importance": "required",
+      "impact": 5,
+      "recommended": "must preserve",
+      "default": "must preserve",
+      "prefilled": true,
+      "prefilled_value": "must preserve existing Phase 1-4 contracts",
+      "answer": {
+        "value": "must preserve existing Phase 1-4 Must preserve existing API contracts where they are already implemented and used by Phase 1–4. New Phase 5–15 endpoints may be added consistently. Breaking changes are allowed only when fixing a verified design/requirements defect and must be explicitly documented and updated across clients/tests.contracts",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "must preserve",
+          "label": "Must preserve existing API contracts"
+        },
+        {
+          "value": "can break with versioning",
+          "label": "Can break with explicit versioning"
+        },
+        {
+          "value": "partial: specify protected endpoints",
+          "label": "Partial preservation for specified endpoints"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "B3",
+      "kit": "backend",
+      "field": "data.migration_strategy",
+      "title": "Data migration strategy",
+      "question": "What database and data migration strategy should govern the continuation?",
+      "importance": "required",
+      "impact": 5,
+      "recommended": "TBD / assess in research phase",
+      "default": "TBD / assess in research phase",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "In-place schema evolution using Prisma migrations. Preserve existing Phase 3 data-model decisions and migration history. Do not reset or replace the database schema. Add migrations incrementally and verify clean migration from a fresh database.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "in-place",
+          "label": "In-place schema evolution"
+        },
+        {
+          "value": "no migration",
+          "label": "No migration; database remains untouched"
+        },
+        {
+          "value": "TBD / assess in research phase",
+          "label": "TBD; assess in research phase"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "B4",
+      "kit": "backend",
+      "field": "auth.framework",
+      "title": "Authentication policy",
+      "question": "Which authentication and authorization mechanism must the continuation preserve or target?",
+      "importance": "recommended",
+      "impact": 4,
+      "recommended": null,
+      "default": "preserve existing auth mechanism; detect from codebase",
+      "prefilled": true,
+      "prefilled_value": "preserve existing Phase 4 auth",
+      "answer": {
+        "value": "Preserve the Phase 4 authentication architecture: JWT-based authentication, secure password hashing, RBAC, protected routes, and resource-scoped authorization. Store Managers are outlet-scoped; Drivers are assigned-work scoped; Loaders access relevant loading work; Dispatchers manage planning/operations.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "B5",
+      "kit": "backend",
+      "field": "nfr.sla",
+      "title": "SLA targets",
+      "question": "What latency, throughput, availability, or regression targets apply to the continuation?",
+      "importance": "recommended",
+      "impact": 3,
+      "recommended": null,
+      "default": "match current production baseline; no regression",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "No formal SLA is specified by the competition. Avoid measurable regressions. Normal interactive API operations should remain responsive, large lists must use bounded queries/pagination where appropriate, and the system must remain usable on phone-sized field devices. Correctness and operational reliability take priority over artificial benchmark targets.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "G1",
+      "kit": "generic",
+      "field": "success.definition",
+      "title": "Definition of done",
+      "question": "What measurable outcome defines successful completion of the Phase 5-15 continuation?",
+      "importance": "required",
+      "impact": 5,
+      "recommended": null,
+      "default": "feature parity with the current system; all existing user-facing behaviors preserved",
+      "prefilled": true,
+      "prefilled_value": "Implement as much as genuinely possible in numerical order, with phase-by-phase validation and an honest completed/incomplete/blocked/external-action-required report",
+      "answer": {
+        "value": "Phase 5–15 is complete when all implementable competition requirements in the approved specification are implemented and verified, including:\n\n- Store Manager ordering/intake flow\n- Dispatcher planning, allocation, validation and deferrals\n- Loader workflow and loading exceptions\n- Driver delivery and proof of delivery\n- Offline driver operation and synchronization/recovery\n- Store receipt confirmation and issue reporting\n- Dispatcher operational progress/exception views\n- Required role-based authorization\n- PostgreSQL/Prisma persistence\n- Responsive Loader/Driver phone flows\n- Competition-critical unit/integration/end-to-end tests\n- Clean Docker startup\n- README judge walkthrough\n- required architecture/data-model/AI-disclosure documentation\n- deployment-ready configuration\n- Datathon local workspace, validation code, notebook structure and submission tooling that can run locally when authorized competition datasets are supplied\n\nAll relevant formatting, lint, typecheck, tests and builds must pass.\n\nItems requiring credentials, official confidential datasets, organizer authorization, public deployment, prototype sharing, YouTube uploads or submission-form actions must be reported as EXTERNAL ACTION REQUIRED or BLOCKED rather than falsely marked complete.\n\nA final requirement traceability audit must classify every requirement as COMPLETE, INCOMPLETE, BLOCKED, or EXTERNAL ACTION REQUIRED.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "G2",
+      "kit": "generic",
+      "field": "out_of_scope",
+      "title": "Out-of-scope boundaries",
+      "question": "Which files, modules, behaviors, datasets, or phases must remain out of scope?",
+      "importance": "recommended",
+      "impact": 4,
+      "recommended": null,
+      "default": "no explicit exclusions; agent will infer from project structure",
+      "prefilled": true,
+      "prefilled_value": "Do not recreate or discard Phase 1-4 work; do not access or invent official competition datasets; do not commit or create branches",
+      "answer": {
+        "value": "Out of scope:\n\n- Rewriting or discarding valid Phase 1–4 work without a verified reason\n- Changing the approved Designathon baseline without documenting a significant departure\n- Replacing the React/Vite/NestJS/PostgreSQL/Prisma architecture\n- Microservices, Kafka, Kubernetes, RabbitMQ, service mesh, Redis or other unnecessary infrastructure\n- Native Android/iOS applications\n- Mandatory GPS/live-map tracking not required by the booklet\n- Invented business rules or competition requirements\n- Treating Task 2B-specific feasibility rules as universal Hackathon rules\n- Mandatory photo/signature POD unless explicitly approved as a design enhancement\n- Mandatory Datathon-to-Hackathon model integration\n- Uploading, committing, transmitting or exposing official competition datasets or derivatives to third parties without explicit organizer authorization\n- Proprietary API-based Datathon modelling/preprocessing\n- prohibited pretrained models, AutoML or fully automated modelling tools\n- Changing external submission artifacts or performing external uploads without the required user authorization/credentials",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "G3",
+      "kit": "generic",
+      "field": "existing_tests.posture",
+      "title": "Test policy",
+      "question": "What policy should apply to existing formatting, lint, typecheck, test, and build failures?",
+      "importance": "recommended",
+      "impact": 4,
+      "recommended": "must pass",
+      "default": "must pass",
+      "prefilled": true,
+      "prefilled_value": "run relevant formatting, lint, typecheck, tests, and builds; repair failures",
+      "answer": {
+        "value": "All existing formatting, lint, typecheck, test and build checks must continue to pass. New Phase 5–15 work must add relevant tests. Do not delete or weaken valid tests simply to obtain a green build. If an existing test is genuinely incompatible with a verified requirement correction, update it while preserving equivalent or stronger coverage and document the reason.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "must pass",
+          "label": "All existing checks must pass"
+        },
+        {
+          "value": "partial: phase-relevant checks must pass",
+          "label": "Phase-relevant checks must pass; unrelated baseline failures are documented"
+        },
+        {
+          "value": "can rewrite",
+          "label": "Tests may be rewritten with equivalent coverage"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "G5",
+      "kit": "generic",
+      "field": "constraints.additional",
+      "title": "Additional constraints",
+      "question": "Are there additional requirements, exclusions, dependencies, compliance rules, or operational constraints?",
+      "importance": "optional",
+      "impact": 3,
+      "recommended": null,
+      "default": "None beyond the decisions listed in this specification.",
+      "prefilled": true,
+      "prefilled_value": "Use only clearly labelled DEMO-* synthetic data; do not invent missing official requirements; report completed, incomplete, blocked, and external-action-required items honestly.",
+      "answer": {
+        "value": "1. Preserve all valid Phase 1–4 work and continue in place.\n\n2. The approved Phase 1 Design Baseline and verified competition requirements are the source of truth.\n\n3. Clearly distinguish:\n   - OFFICIAL REQUIREMENT\n   - DESIGN DECISION\n   - OPTIONAL ENHANCEMENT\n   - DATATHON-ONLY RULE\n\n4. Do not invent missing competition rules.\n\n5. Use a NestJS modular monolith. Keep business and allocation logic out of React components and controllers.\n\n6. Preserve strict TypeScript and existing repository conventions.\n\n7. Official competition datasets are confidential. Do not upload, transmit, commit, publish, or expose them publicly or privately to third-party systems without explicit organizer authorization.\n\n8. Synthetic development data must be clearly labelled:\n   SYNTHETIC DEVELOPMENT DATA — NOT OFFICIAL COMPETITION DATA.\n\n9. Datathon code must be designed to run locally against authorized official files. Do not claim real model performance without running the real data locally.\n\n10. Driver offline operation must be a real persistent workflow, not only an offline banner. Pending work must survive reload and reconcile after connectivity returns.\n\n11. Driver delivery completion and Store Manager receipt confirmation must remain separate concepts.\n\n12. Planning SERVED status must not be treated as actual DELIVERED status.\n\n13. Preserve the distinction between ordinary Hackathon operational validation and Datathon Task 2B-specific rules.\n\n14. Run relevant formatting, linting, typechecking, tests and builds at the end of every implementation phase and fix failures before continuing.\n\n15. Never mark unfinished external actions as complete. Public deployment, videos, prototype sharing and submission forms must be reported accurately.\n\n16. Continue sequentially from Phase 5 through Phase 15 using the existing repository. Do not recreate the project.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    }
+  ]
+}
