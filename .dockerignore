@@ -1,0 +1,16 @@
+.git
+**/node_modules
+**/dist
+.env
+.env.*
+**/*.log
+test-results
+playwright-report
+data
+datasets
+**/*.csv
+**/*.parquet
+**/*.pkl
+**/*.joblib
+docs
+apps/api/src/generated

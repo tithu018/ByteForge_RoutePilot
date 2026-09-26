@@ -1,0 +1,22 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
+playwright-report/
+test-results/
+apps/api/src/generated/
+data/
+datasets/
+**/Training Data/
+**/Test Data/
+**/General Data/
+**/Submission Templates/
+*.csv
+*.parquet
+*.pkl
+*.joblib
+.DS_Store

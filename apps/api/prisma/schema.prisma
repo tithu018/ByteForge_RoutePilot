@@ -1,0 +1,11 @@
+generator client {
+  provider = "prisma-client"
+  output = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Business entities are deliberately deferred. Prisma is used for connectivity now.
