@@ -4,7 +4,7 @@ Tech-Triathlon 2026 · `<TEAM_NAME>_<SOLUTION_NAME>`
 
 A connected delivery platform for Waypoint Group's Dispatcher, Loader, Driver and Store Manager. The approved [Phase 1 Design Baseline](docs/design-baseline/README.md) is the implementation reference.
 
-**Current scope: Phase 2 project foundation. Business functionality has not yet been implemented.** Workspace routes are explicit development previews. There is no authentication, operational data, allocation, delivery recording or offline synchronization yet. This is not the completed competition submission or a completed high-fidelity Designathon artifact.
+**Current scope: Phase 4 authentication foundation.** The relational domain model, local synthetic seed, login, JWT access tokens and role-scoped workspace routes are implemented. Operational APIs, allocation validation, delivery recording and offline synchronization are still later phases. This is not the completed competition submission or a completed high-fidelity Designathon artifact.
 
 ## Architecture
 
@@ -29,7 +29,7 @@ packages/shared/          Shared contracts; built before consuming workspaces
 packages/ui/              UI primitives and design tokens
 docs/design-baseline/     Original approved Phase 1 specification
 docs/architecture/       Foundation architecture and conventions
-docs/data-model/         Current empty schema and future domain boundary
+docs/data-model/         Phase 3 domain model and data policies
 docs/design/             Baseline handoff and design decisions
 scripts/                 Service readiness helper
 tests/e2e/               Browser smoke tests
@@ -64,18 +64,18 @@ Copy-Item .env.example .env
 
 The supplied credentials are **local-only examples**, not production secrets. `.env` is ignored by Git and Docker build context. The default PostgreSQL host port is **55432**, avoiding common local/reserved 5432 conflicts. If changing credentials or ports, update the host `DATABASE_URL` to match. Use URL-safe credentials or correctly encoded URL values; the default Compose interpolation assumes URL-safe values.
 
-| Variable | Purpose / default |
-|---|---|
-| `NODE_ENV` | Host runtime mode, `development`; built API container uses `production` |
-| `API_PORT` | Host API port, `3000`; container listens internally on 3000 |
-| `WEB_PORT` | Host web/Vite port, `5173`; web container listens on 8080 internally |
-| `POSTGRES_PORT` | Host PostgreSQL port, `55432`; container port 5432 |
-| `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` | Local database configuration |
-| `DATABASE_URL` | Host API/Prisma connection string; Compose constructs its internal `postgres` service URL separately |
-| `VITE_API_BASE_URL` | Public browser API path, `/api/v1`; never a secret |
-| `API_BASE_URL` | Vite proxy upstream, `http://localhost:3000`; server-side config only |
-| `CORS_ORIGINS` | Comma-separated exact origins, default `http://localhost:5173`; no wildcard or trailing path |
-| `JWT_SECRET` | Reserved placeholder only; unused until authentication phase |
+| Variable                                              | Purpose / default                                                                                    |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`                                            | Host runtime mode, `development`; built API container uses `production`                              |
+| `API_PORT`                                            | Host API port, `3000`; container listens internally on 3000                                          |
+| `WEB_PORT`                                            | Host web/Vite port, `5173`; web container listens on 8080 internally                                 |
+| `POSTGRES_PORT`                                       | Host PostgreSQL port, `55432`; container port 5432                                                   |
+| `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` | Local database configuration                                                                         |
+| `DATABASE_URL`                                        | Host API/Prisma connection string; Compose constructs its internal `postgres` service URL separately |
+| `VITE_API_BASE_URL`                                   | Public browser API path, `/api/v1`; never a secret                                                   |
+| `API_BASE_URL`                                        | Vite proxy upstream, `http://localhost:3000`; server-side config only                                |
+| `CORS_ORIGINS`                                        | Comma-separated exact origins, default `http://localhost:5173`; no wildcard or trailing path         |
+| `JWT_SECRET`                                          | Reserved placeholder only; unused until authentication phase                                         |
 
 If changing `WEB_PORT`, update `CORS_ORIGINS` as appropriate. If changing `API_PORT` for host development, update `API_BASE_URL`. Existing PostgreSQL volumes retain their original database/user credentials: editing environment values does not rotate an initialized database password.
 
@@ -85,7 +85,7 @@ If changing `WEB_PORT`, update `CORS_ORIGINS` as appropriate. If changing `API_P
 docker compose up
 ```
 
-First startup builds images, starts PostgreSQL, applies the empty baseline migration, waits for API readiness and serves the web app. No dataset download or seed is required in this phase. Later phases must extend seeding to meet the final competition requirement.
+First startup builds images, starts PostgreSQL, applies committed migrations, waits for API readiness and serves the web app. No dataset download is required. The local synthetic seed is separate and never imports competition data.
 
 - Web: **http://localhost:5173**
 - API liveness: **http://localhost:3000/api/v1/health** → `{"status":"ok"}`
@@ -117,20 +117,21 @@ pnpm dev
 
 ## Commands and verification
 
-| Command | What it does |
-|---|---|
-| `pnpm dev` | Shared/API/web development processes |
-| `pnpm build` | Prisma generation, shared/UI declarations, API compilation and web production bundle |
-| `pnpm lint` | ESLint, zero warnings |
-| `pnpm typecheck` | Generate prerequisites and strict-check all workspaces |
-| `pnpm test` | API infrastructure and frontend smoke tests; no external DB required |
-| `pnpm test:e2e` | Browser smoke tests against an already running complete stack |
-| `pnpm format:check` / `pnpm format` | Check/write formatting; historical Phase 1 documents excluded |
-| `pnpm db:generate` | Generate Prisma client; no database mutation |
-| `pnpm db:migrate` | Deploy committed migrations |
-| `pnpm db:migrate:dev -- --name <change>` | Author a future approved schema migration; inspect changes before commit |
-| `pnpm db:studio` | Inspect local database |
-| `pnpm db:check` | Compile and run a real Prisma `SELECT 1` connectivity check |
+| Command                                  | What it does                                                                         |
+| ---------------------------------------- | ------------------------------------------------------------------------------------ |
+| `pnpm dev`                               | Shared/API/web development processes                                                 |
+| `pnpm build`                             | Prisma generation, shared/UI declarations, API compilation and web production bundle |
+| `pnpm lint`                              | ESLint, zero warnings                                                                |
+| `pnpm typecheck`                         | Generate prerequisites and strict-check all workspaces                               |
+| `pnpm test`                              | API infrastructure and frontend smoke tests; no external DB required                 |
+| `pnpm test:e2e`                          | Browser smoke tests against an already running complete stack                        |
+| `pnpm format:check` / `pnpm format`      | Check/write formatting; historical Phase 1 documents excluded                        |
+| `pnpm db:generate`                       | Generate Prisma client; no database mutation                                         |
+| `pnpm db:migrate`                        | Deploy committed migrations                                                          |
+| `pnpm db:migrate:dev -- --name <change>` | Author a future approved schema migration; inspect changes before commit             |
+| `pnpm --filter @waypoint/api db:seed`    | Build and apply idempotent `DEMO-*` synthetic development records                    |
+| `pnpm db:studio`                         | Inspect local database                                                               |
+| `pnpm db:check`                          | Compile and run a real Prisma `SELECT 1` connectivity check                          |
 
 Single test: `pnpm --filter @waypoint/web test src/test/shell.test.tsx` or `pnpm exec playwright test --grep "dialog"`.
 
@@ -146,25 +147,35 @@ Local Playwright is headed; CI is headless. Tests cover desktop and phone contex
 
 ## Current routes
 
-| Route | Current behavior |
-|---|---|
-| `/` | Redirect to `/dispatcher` |
-| `/dispatcher` | Desktop operations shell |
-| `/dispatcher/orders`, `/planning`, `/fleet`, `/deliveries`, `/deferrals`, `/exceptions`, `/capacity` | Each suffix under `/dispatcher`; labelled placeholders |
-| `/loader`, `/loader/active`, `/loader/issues` | Tablet/phone warehouse shell |
-| `/driver`, `/driver/trip`, `/driver/sync` | Mobile shell and connectivity reservation; **no offline storage/sync** |
-| `/store`, `/store/orders`, `/store/create`, `/store/issues` | Simple store shell; **no order form/workflow** |
-| `/foundation` | Real health checks and clearly labelled component examples |
-| `/access-denied` | Access-denied UI placeholder, not active RBAC |
-| Unknown routes | Not-found page |
+| Route                                                                                                | Current behavior                                                       |
+| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `/`                                                                                                  | Redirect to `/dispatcher`                                              |
+| `/dispatcher`                                                                                        | Desktop operations shell                                               |
+| `/dispatcher/orders`, `/planning`, `/fleet`, `/deliveries`, `/deferrals`, `/exceptions`, `/capacity` | Each suffix under `/dispatcher`; labelled placeholders                 |
+| `/loader`, `/loader/active`, `/loader/issues`                                                        | Tablet/phone warehouse shell                                           |
+| `/driver`, `/driver/trip`, `/driver/sync`                                                            | Mobile shell and connectivity reservation; **no offline storage/sync** |
+| `/store`, `/store/orders`, `/store/create`, `/store/issues`                                          | Simple store shell; **no order form/workflow**                         |
+| `/foundation`                                                                                        | Real health checks and clearly labelled component examples             |
+| `/access-denied`                                                                                     | Access-denied UI placeholder, not active RBAC                          |
+| Unknown routes                                                                                       | Not-found page                                                         |
 
-The account menu is explicitly a **development preview selector**, not authentication or impersonation. No accounts are seeded yet; the four required judge accounts belong to the authentication/seed phases.
+The account menu is explicitly a **development preview selector**, not authentication or impersonation. The Phase 4 login uses four local synthetic accounts; the seed contains only labelled `DEMO-*` records.
+
+All development accounts use `DemoOnly-ChangeMe-2026!`; these are not final judge credentials:
+
+| Role          | Email                            |
+| ------------- | -------------------------------- |
+| Dispatcher    | `dispatcher.demo@waypoint.local` |
+| Loader        | `loader.demo@waypoint.local`     |
+| Driver        | `driver.demo@waypoint.local`     |
+| Store Manager | `store.demo@waypoint.local`      |
 
 ## Phase roadmap
 
 1. Design Baseline — approved specification; visual Designathon prototype/video remain separate deliverables.
-2. Foundation — this scope: workspace, infrastructure, shared primitives, checks and documentation.
-3. **Recommended next: authentication and scoped role access**, with only the necessary approved identity schema, four development/judge accounts, login/session handling and route/API guards. No operational workflows without further phase approval.
-4. Subsequent approved phases: domain/reference data, orders/intake, planning/validation/deferrals, loading, driver delivery/receipt, dedicated offline reconciliation, operations/forecast presentation and competition packaging. Datathon remains separate.
+2. Foundation — workspace, infrastructure, shared primitives, checks and documentation.
+3. Database and domain model — relational foundation, migration and labelled synthetic development seed.
+4. **Next: authentication and scoped role access**, with only the necessary approved identity schema, four development/judge accounts, login/session handling and route/API guards.
+5. Subsequent approved phases: reference data, orders/intake, planning/validation/deferrals, loading, driver delivery/receipt, dedicated offline reconciliation, operations/forecast presentation and competition packaging. Datathon remains separate.
 
 Do not import, commit or transmit competition datasets in this phase. Record significant later deviations from the submitted Designathon design in [the design handoff](docs/design/README.md). See [AI disclosure](docs/ai-disclosure.md).

@@ -15,5 +15,6 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit(): Promise<void> { await this.client.$connect(); }
   async onModuleDestroy(): Promise<void> { await this.client.$disconnect(); }
+  get prisma(): PrismaClient { return this.client; }
   async checkConnection(): Promise<void> { await this.client.$queryRaw`SELECT 1`; }
 }

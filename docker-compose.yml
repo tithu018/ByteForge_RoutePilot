@@ -24,6 +24,7 @@ services:
       API_PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER:-waypoint}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-waypoint}?schema=public
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      JWT_SECRET: ${JWT_SECRET:?Copy .env.example to .env first}
     ports:
       - '127.0.0.1:${API_PORT:-3000}:3000'
     depends_on:

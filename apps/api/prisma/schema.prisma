@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client"
-  output = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
@@ -8,4 +8,465 @@ datasource db {
   provider = "postgresql"
 }
 
-// Business entities are deliberately deferred. Prisma is used for connectivity now.
+enum Role {
+  DISPATCHER
+  LOADER
+  DRIVER
+  STORE_MANAGER
+}
+
+enum VehicleType {
+  TRUCK
+  VAN
+}
+
+enum TemperatureType {
+  AMBIENT
+  REEFER
+}
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  PLANNED
+  DEFERRED
+  SERVED
+  DELIVERED
+  RECEIVED
+  CANCELLED
+}
+
+enum PlanStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AllocationStatus {
+  SERVED
+  DEFERRED
+  CANCELLED
+}
+
+enum DeferralReason {
+  CAPACITY
+  TEMPERATURE
+  ACCESS
+  DEPOT
+  DELIVERY_WINDOW
+  OPERATING_DAY
+  VEHICLE_AVAILABILITY
+  FUEL_QUOTA
+  MANUAL
+}
+
+enum LoadingEventType {
+  STARTED
+  ITEM_LOADED
+  MISSING
+  DAMAGED
+  SHORTFALL
+  READY
+  COMPLETED
+}
+
+enum DeliveryEventType {
+  ARRIVED
+  OUTCOME_RECORDED
+  POD_RECORDED
+  ISSUE_REPORTED
+  COMPLETED
+}
+
+enum IssueType {
+  LOADING
+  DELIVERY
+  RECEIPT
+  OTHER
+}
+
+enum IssueStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+  DISMISSED
+}
+
+enum SyncEventStatus {
+  PENDING
+  ACCEPTED
+  ALREADY_APPLIED
+  RETRYABLE_FAILURE
+  CONFLICT
+}
+
+model User {
+  id                   String                @id @default(cuid())
+  email                String                @unique
+  displayName          String
+  passwordHash         String?
+  role                 Role
+  outletId             String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  outlet               Outlet?               @relation(fields: [outletId], references: [id], onDelete: SetNull)
+  assignedTrips        Trip[]                @relation("DriverTrips")
+  loadingEvents        LoadingEvent[]
+  deliveryEvents       DeliveryEvent[]
+  receiptConfirmations ReceiptConfirmation[]
+  createdIssues        Issue[]               @relation("IssueReporter")
+  resolvedIssues       Issue[]               @relation("IssueResolver")
+  auditEvents          AuditEvent[]
+  syncEvents           SyncEvent[]
+
+  @@index([role])
+  @@index([outletId])
+}
+
+model Brand {
+  id        String   @id @default(cuid())
+  sourceId  String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  outlets   Outlet[]
+  orders    Order[]
+}
+
+model Depot {
+  id        String    @id @default(cuid())
+  sourceId  String    @unique
+  name      String
+  district  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  outlets   Outlet[]
+  vehicles  Vehicle[]
+  plans     Plan[]
+}
+
+model Outlet {
+  id                String                @id @default(cuid())
+  sourceId          String                @unique
+  name              String
+  district          String
+  dockType          String?
+  parkingConstraint String?
+  mallWindow        String?
+  windowOpenTime    DateTime?             @db.Time(0)
+  windowCloseTime   DateTime?             @db.Time(0)
+  brandId           String
+  depotId           String
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  brand             Brand                 @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  depot             Depot                 @relation(fields: [depotId], references: [id], onDelete: Restrict)
+  users             User[]
+  orders            Order[]
+  tripStops         TripStop[]
+  receipts          ReceiptConfirmation[]
+
+  @@index([brandId])
+  @@index([depotId])
+  @@index([district])
+}
+
+model Vehicle {
+  id               String          @id @default(cuid())
+  sourceId         String          @unique
+  name             String
+  type             VehicleType
+  temperature      TemperatureType
+  weightCapacityKg Decimal         @db.Decimal(12, 3)
+  volumeCapacityM3 Decimal         @db.Decimal(12, 3)
+  fuelType         String
+  kmPerL           Decimal         @db.Decimal(8, 3)
+  weeklyFuelQuotaL Decimal         @db.Decimal(12, 3)
+  homeDepotId      String
+  available        Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  homeDepot        Depot           @relation(fields: [homeDepotId], references: [id], onDelete: Restrict)
+  trips            Trip[]
+  fuelUsages       FuelUsage[]
+
+  @@index([homeDepotId])
+  @@index([type, temperature])
+}
+
+model CalendarDay {
+  id           String   @id @default(cuid())
+  date         DateTime @db.Date
+  dow          Int
+  dowName      String
+  isWeekend    Boolean
+  isoYear      Int
+  isoWeek      Int
+  isPayday     Boolean  @default(false)
+  festival     String?
+  festivalRamp Boolean  @default(false)
+  isHoliday    Boolean  @default(false)
+  monsoon      Boolean  @default(false)
+  isOperating  Boolean  @default(true)
+
+  @@unique([date])
+  @@index([isoYear, isoWeek])
+}
+
+model Order {
+  id                    String          @id @default(cuid())
+  sourceId              String
+  status                OrderStatus     @default(DRAFT)
+  submittedAt           DateTime?
+  requestedDeliveryDate DateTime        @db.Date
+  temperature           TemperatureType
+  units                 Int
+  weightKg              Decimal         @db.Decimal(12, 3)
+  volumeM3              Decimal         @db.Decimal(12, 3)
+  outletId              String
+  brandId               String
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  outlet                Outlet          @relation(fields: [outletId], references: [id], onDelete: Restrict)
+  brand                 Brand           @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  allocations           Allocation[]
+  deferrals             Deferral[]
+  planDecisions         PlanDecision[]
+  tripStops             TripStop[]
+  issues                Issue[]
+
+  @@unique([sourceId, requestedDeliveryDate])
+  @@index([outletId, requestedDeliveryDate])
+  @@index([status, requestedDeliveryDate])
+}
+
+model Plan {
+  id           String         @id @default(cuid())
+  name         String
+  deliveryDate DateTime       @db.Date
+  status       PlanStatus     @default(DRAFT)
+  version      Int            @default(1)
+  depotId      String
+  publishedAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  depot        Depot          @relation(fields: [depotId], references: [id], onDelete: Restrict)
+  decisions    PlanDecision[]
+  trips        Trip[]
+  allocations  Allocation[]
+  deferrals    Deferral[]
+
+  @@unique([depotId, deliveryDate, version])
+  @@index([deliveryDate, status])
+}
+
+model PlanDecision {
+  id          String           @id @default(cuid())
+  planId      String
+  orderId     String
+  decision    AllocationStatus
+  explanation Json?
+  createdAt   DateTime         @default(now())
+  plan        Plan             @relation(fields: [planId], references: [id], onDelete: Cascade)
+  order       Order            @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@unique([planId, orderId])
+}
+
+model Trip {
+  id            String         @id @default(cuid())
+  planId        String
+  vehicleId     String
+  driverId      String?
+  tripNumber    Int
+  status        String         @default("PLANNED")
+  revision      Int            @default(1)
+  startedAt     DateTime?
+  completedAt   DateTime?
+  plan          Plan           @relation(fields: [planId], references: [id], onDelete: Restrict)
+  vehicle       Vehicle        @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+  driver        User?          @relation("DriverTrips", fields: [driverId], references: [id], onDelete: SetNull)
+  stops         TripStop[]
+  allocations   Allocation[]
+  loadingEvents LoadingEvent[]
+  deliveries    Delivery[]
+  fuelUsages    FuelUsage[]
+
+  @@unique([planId, tripNumber])
+  @@index([vehicleId])
+  @@index([driverId])
+}
+
+model TripStop {
+  id             String    @id @default(cuid())
+  tripId         String
+  outletId       String
+  orderId        String
+  sequence       Int
+  plannedArrival DateTime?
+  trip           Trip      @relation(fields: [tripId], references: [id], onDelete: Restrict)
+  outlet         Outlet    @relation(fields: [outletId], references: [id], onDelete: Restrict)
+  order          Order     @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  delivery       Delivery?
+
+  @@unique([tripId, sequence])
+  @@unique([tripId, orderId])
+  @@index([outletId])
+}
+
+model Allocation {
+  id        String           @id @default(cuid())
+  planId    String
+  orderId   String
+  tripId    String?
+  status    AllocationStatus
+  createdAt DateTime         @default(now())
+  plan      Plan             @relation(fields: [planId], references: [id], onDelete: Restrict)
+  order     Order            @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  trip      Trip?            @relation(fields: [tripId], references: [id], onDelete: Restrict)
+
+  @@unique([planId, orderId])
+  @@index([orderId, status])
+}
+
+model Deferral {
+  id          String         @id @default(cuid())
+  planId      String
+  orderId     String
+  reason      DeferralReason
+  explanation String
+  createdAt   DateTime       @default(now())
+  plan        Plan           @relation(fields: [planId], references: [id], onDelete: Restrict)
+  order       Order          @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@index([orderId, createdAt])
+}
+
+model LoadingEvent {
+  id         String           @id @default(cuid())
+  tripId     String
+  actorId    String?
+  type       LoadingEventType
+  orderId    String?
+  details    Json?
+  occurredAt DateTime
+  createdAt  DateTime         @default(now())
+  trip       Trip             @relation(fields: [tripId], references: [id], onDelete: Restrict)
+  actor      User?            @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([tripId, occurredAt])
+}
+
+model Delivery {
+  id          String               @id @default(cuid())
+  tripId      String
+  tripStopId  String               @unique
+  status      String               @default("PENDING")
+  deliveredAt DateTime?
+  trip        Trip                 @relation(fields: [tripId], references: [id], onDelete: Restrict)
+  tripStop    TripStop             @relation(fields: [tripStopId], references: [id], onDelete: Restrict)
+  events      DeliveryEvent[]
+  proof       ProofOfDelivery?
+  receipt     ReceiptConfirmation?
+  issues      Issue[]
+}
+
+model DeliveryEvent {
+  id         String            @id @default(cuid())
+  deliveryId String
+  actorId    String?
+  type       DeliveryEventType
+  details    Json?
+  occurredAt DateTime
+  createdAt  DateTime          @default(now())
+  delivery   Delivery          @relation(fields: [deliveryId], references: [id], onDelete: Restrict)
+  actor      User?             @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([deliveryId, occurredAt])
+}
+
+model ProofOfDelivery {
+  id           String   @id @default(cuid())
+  deliveryId   String   @unique
+  receiverName String?
+  notes        String?
+  reference    String?
+  capturedAt   DateTime
+  delivery     Delivery @relation(fields: [deliveryId], references: [id], onDelete: Restrict)
+}
+
+model ReceiptConfirmation {
+  id               String   @id @default(cuid())
+  deliveryId       String   @unique
+  outletId         String
+  actorId          String?
+  receivedAt       DateTime
+  quantityAccepted Int?
+  notes            String?
+  delivery         Delivery @relation(fields: [deliveryId], references: [id], onDelete: Restrict)
+  outlet           Outlet   @relation(fields: [outletId], references: [id], onDelete: Restrict)
+  actor            User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+}
+
+model Issue {
+  id          String      @id @default(cuid())
+  type        IssueType
+  status      IssueStatus @default(OPEN)
+  orderId     String?
+  deliveryId  String?
+  reporterId  String?
+  resolverId  String?
+  title       String
+  description String
+  createdAt   DateTime    @default(now())
+  resolvedAt  DateTime?
+  order       Order?      @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  delivery    Delivery?   @relation(fields: [deliveryId], references: [id], onDelete: Restrict)
+  reporter    User?       @relation("IssueReporter", fields: [reporterId], references: [id], onDelete: SetNull)
+  resolver    User?       @relation("IssueResolver", fields: [resolverId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([orderId])
+  @@index([deliveryId])
+}
+
+model FuelUsage {
+  id         String   @id @default(cuid())
+  vehicleId  String
+  tripId     String?
+  litres     Decimal  @db.Decimal(12, 3)
+  occurredAt DateTime
+  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+  trip       Trip?    @relation(fields: [tripId], references: [id], onDelete: SetNull)
+}
+
+model SyncEvent {
+  id               String          @id @default(cuid())
+  clientEventId    String          @unique
+  actorId          String?
+  entityType       String
+  entityId         String
+  eventType        String
+  deviceOccurredAt DateTime
+  serverReceivedAt DateTime        @default(now())
+  baseVersion      Int?
+  payload          Json
+  status           SyncEventStatus @default(PENDING)
+  actor            User?           @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([status, serverReceivedAt])
+}
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String
+  details    Json?
+  occurredAt DateTime @default(now())
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId, occurredAt])
+}

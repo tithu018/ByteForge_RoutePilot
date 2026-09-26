@@ -1,4 +1,4 @@
-# Approved design baseline and Phase 2 handoff
+# Approved design baseline and implementation handoff
 
 The user approved Phase 1 before authorizing Phase 2. The original [Design Baseline DB-0.1](../design-baseline/README.md) is preserved as the specification snapshot; its original review-status text is historical. This page records current approval without rewriting the original artifact.
 
@@ -6,7 +6,7 @@ Implemented foundation: light neutral surfaces, deep navy navigation, blue accen
 
 Development-only adaptation: an explicitly labelled preview selector makes four unauthenticated shell routes inspectable. It is not the future operational account-switching model and must be replaced/restricted when authentication is implemented. `/foundation` contains component examples with labelled sample values, not business records.
 
-The Phase 2 request places Prisma inside the API workspace; this refines the earlier conceptual root-level folder proposal without changing the modular-monolith architecture. High-fidelity Designathon prototype/export/video remain separate submission work; a running shell does not substitute for them.
+The implementation now continues through Phase 3 with Prisma inside the API workspace; this refines the earlier conceptual root-level folder proposal without changing the modular-monolith architecture. The Phase 3 schema adds domain persistence but does not change approved screen flows. High-fidelity Designathon prototype/export/video remain separate submission work; a running shell does not substitute for them.
 
 ## Significant departures register
 

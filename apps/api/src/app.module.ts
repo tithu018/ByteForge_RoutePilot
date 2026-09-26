@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { resolve } from 'node:path';
 import { validateEnvironment } from './config/environment';
 import { HealthModule } from './health/health.module';
+import { DatabaseModule } from './database/database.module';
+import { AuthModule } from './modules/auth/auth.module';
 
-@Module({ imports: [ConfigModule.forRoot({ isGlobal: true, envFilePath: resolve(__dirname, '../../../../.env'), validate: validateEnvironment }), HealthModule] })
+@Module({ imports: [ConfigModule.forRoot({ isGlobal: true, envFilePath: resolve(__dirname, '../../../../.env'), validate: validateEnvironment }), DatabaseModule, AuthModule, HealthModule] })
 export class AppModule {}
