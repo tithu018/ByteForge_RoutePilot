@@ -1983,58 +1983,37 @@ a {
   min-height: 30px;
   font-size: 10px;
 }
-/* Driver: mobile image header, overlapping next-stop card, dark bottom navigation. */
-.workspace-driver .desktop-sidebar {
-  display: none;
-}
-.workspace-driver .shell-main {
-  margin-left: 0;
-  width: min(100%, 920px);
-  max-width: 920px;
-  margin-inline: auto;
+/* Driver: website workspace on desktop, mobile-first controls on small screens. */
+.workspace-driver {
   background: #f1f5fa;
   min-height: 100dvh;
-  box-shadow: 0 0 0 1px #dce7f3;
 }
-.workspace-driver {
-  background:
-    radial-gradient(circle at 12% 10%, #d5e9fa 0, transparent 32%),
-    linear-gradient(90deg, #eef5fb 0, #f9fcff 26%, #f9fcff 74%, #eef5fb 100%);
+.workspace-driver .shell-main {
+  margin-left: 244px;
+  width: auto;
+  max-width: none;
+  background: #f1f5fa;
   min-height: 100dvh;
 }
 .workspace-driver .app-header {
-  background: #06213b;
-  color: white;
-  height: 88px;
-  padding: 15px 22px;
+  background: linear-gradient(100deg, #f8fbff, #eef5fa);
+  color: #06133b;
+  height: 58px;
+  padding: 0 20px;
 }
 .workspace-driver .header-search,
 .workspace-driver .header-date,
 .workspace-driver .header-right > .user-menu {
-  display: none;
-}
-.workspace-driver .mobile-brand {
-  display: block;
-}
-.workspace-driver .mobile-brand .waypoint-brand {
-  color: white;
-}
-.workspace-driver .mobile-brand .waypoint-brand strong {
-  font-size: 25px;
-}
-.workspace-driver .mobile-brand .waypoint-brand small {
-  font-size: 13px;
-}
-.workspace-driver .header-right .ui-button {
-  color: white;
+  display: flex;
 }
 .workspace-driver .page-container {
-  padding: 0 clamp(14px, 3vw, 42px) 106px;
+  max-width: 1320px;
+  padding: 18px 24px 28px;
 }
 .driver-connection {
-  position: absolute;
-  top: 95px;
-  right: max(24px, calc((100vw - min(920px, 100vw)) / 2 + 28px));
+  position: fixed;
+  top: 70px;
+  right: 28px;
   z-index: 2;
   display: flex;
   align-items: center;
@@ -2051,12 +2030,21 @@ a {
   border-color: #e87868;
   color: #fff;
 }
+.driver-reference {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+  gap: 18px;
+  align-items: start;
+}
 .driver-hero {
   position: relative;
-  min-height: 250px;
-  margin: 0 calc(-1 * clamp(14px, 3vw, 42px));
-  padding: 30px clamp(26px, 6vw, 64px) 64px;
+  grid-column: 1 / -1;
+  min-height: 245px;
+  margin: 0 0 18px;
+  padding: 36px clamp(28px, 4vw, 56px);
   color: white;
+  border-radius: 12px;
+  overflow: hidden;
   background:
     linear-gradient(90deg, #031b35b0, #041b3520),
     url('/images/waypoint-highway.png') 65% center/cover;
@@ -2067,7 +2055,7 @@ a {
   margin-bottom: 3px;
 }
 .driver-hero h1 {
-  font-size: 41px;
+  font-size: clamp(38px, 4vw, 58px);
   line-height: 1.2;
   margin-bottom: 16px;
 }
@@ -2090,7 +2078,7 @@ a {
 }
 .driver-next-stop {
   position: relative;
-  margin-top: -44px;
+  margin-top: 0;
   padding: clamp(18px, 3vw, 28px);
   box-shadow: 0 5px 18px #1e3b6b0a;
   border-radius: 12px;
@@ -2221,7 +2209,7 @@ a {
 }
 .driver-upcoming {
   padding: 20px;
-  margin-top: 14px;
+  margin-top: 0;
   border-radius: 12px;
 }
 .driver-upcoming ol {
@@ -2258,17 +2246,7 @@ a {
   font-size: 10px;
 }
 .workspace-driver .mobile-bottom-nav {
-  position: fixed;
-  display: flex;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(100%, 920px);
-  background: #031d38;
-  min-height: 78px;
-  z-index: 30;
-  border-top: 1px solid #224462;
-  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+  display: none;
 }
 .workspace-driver .mobile-bottom-nav a {
   color: #c1d4ec;
@@ -2939,7 +2917,7 @@ a {
     max-width: 180px;
   }
   .workspace-driver .shell-main {
-    margin-inline: auto;
+    margin-left: 190px;
   }
   .workspace-store .store-top-nav {
     gap: 20px;
@@ -3562,6 +3540,9 @@ a {
   .workspace-driver .page-container {
     padding: 0 10px 85px;
   }
+  .driver-reference {
+    display: block;
+  }
   .driver-connection {
     top: 92px;
     right: 15px;
@@ -3645,7 +3626,17 @@ a {
     font-size: 9px;
   }
   .workspace-driver .mobile-bottom-nav {
+    position: fixed;
+    display: flex;
+    bottom: 0;
     left: 50%;
+    transform: translateX(-50%);
+    width: min(100%, 600px);
+    background: #031d38;
+    min-height: 78px;
+    z-index: 30;
+    border-top: 1px solid #224462;
+    padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
   }
   .sync-banner {
     margin-inline: -10px;
@@ -3812,25 +3803,6 @@ a {
   .tracking-actions .ui-button {
     font-size: 11px;
     padding-inline: 10px;
-  }
-}
-@media (min-width: 760px) and (max-width: 1250px) {
-  .workspace-driver .shell-main {
-    width: min(100%, 860px);
-    max-width: 860px;
-  }
-  .workspace-driver .page-container {
-    padding: 0 28px 100px;
-  }
-  .driver-connection {
-    right: max(22px, calc((100vw - min(860px, 100vw)) / 2 + 28px));
-  }
-  .driver-hero {
-    margin-inline: -28px;
-    padding-inline: 38px;
-  }
-  .workspace-driver .mobile-bottom-nav {
-    width: min(100%, 860px);
   }
 }
 @media (prefers-reduced-motion: reduce) {
