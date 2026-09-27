@@ -5,6 +5,8 @@ import {
   CalendarDays,
   ChevronDown,
   Headphones,
+  LogOut,
+  Mail,
   Menu,
   Search,
   Settings2,
@@ -78,6 +80,7 @@ export function WorkspaceLayout({ workspace }: { workspace: Workspace }) {
     }
   }, [current?.label, location.pathname]);
   const field = workspace.id === 'driver' || workspace.id === 'loader';
+  const user = session?.user;
   const account = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -86,20 +89,34 @@ export function WorkspaceLayout({ workspace }: { workspace: Workspace }) {
             <UserRound size={21} />
           </span>
           <span className="user-menu-label">
-            {session?.user.displayName ?? 'Account'}
+            {user?.displayName ?? 'Account'}
             <small>{workspace.name}</small>
           </span>
           <ChevronDown size={15} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>{session?.user.email ?? 'Authorized workspace'}</DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="account-menu">
+        <DropdownMenuLabel className="account-menu-profile">
+          <span className="account-menu-avatar" aria-hidden="true">
+            <UserRound size={20} />
+          </span>
+          <span>
+            <strong>{user?.displayName ?? 'Account'}</strong>
+            <small>{workspace.name}</small>
+          </span>
+        </DropdownMenuLabel>
+        <div className="account-menu-meta">
+          <Mail size={15} aria-hidden="true" />
+          <span>{user?.email ?? 'Authorized workspace'}</span>
+        </div>
         <DropdownMenuItem
+          className="account-menu-signout"
           onSelect={() => {
             clearSession();
             navigate('/login', { replace: true });
           }}
         >
+          <LogOut size={16} aria-hidden="true" />
           Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
