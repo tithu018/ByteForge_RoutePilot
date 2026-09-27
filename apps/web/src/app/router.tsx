@@ -1,11 +1,12 @@
 import { lazy, Suspense } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router';
+import { createBrowserRouter } from 'react-router';
 import { WorkspaceLayout } from './workspace-layout';
 import { workspaces } from './workspaces';
 import { PageLoading } from './loading';
 import { AccessDeniedPage, NotFoundPage } from '../pages/status-pages';
 import { LoginPage, ProtectedRoute } from '../pages/login-page';
 
+const LandingPage = lazy(() => import('../pages/landing-page'));
 const WorkspacePage = lazy(() => import('../pages/workspace-page'));
 const FoundationPage = lazy(() => import('../pages/foundation-page'));
 const StoreOrdersPage = lazy(() =>
@@ -38,7 +39,14 @@ const storeDetail = (
   </Suspense>
 );
 export const router = createBrowserRouter([
-  { path: '/', element: <Navigate to="/dispatcher" replace /> },
+  {
+    path: '/',
+    element: (
+      <Suspense fallback={<PageLoading />}>
+        <LandingPage />
+      </Suspense>
+    ),
+  },
   { path: '/login', element: <LoginPage /> },
   ...workspaces.map((workspace) => ({
     path: `/${workspace.id}`,

@@ -1,7 +1,8 @@
+import { OrderTracking } from '../components/order-tracking';
 import { useState } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ClipboardList, PackageCheck, Plus, RefreshCw } from 'lucide-react';
+import { ClipboardList, PackageCheck, Plus } from 'lucide-react';
 import {
   Alert,
   Badge,
@@ -56,7 +57,7 @@ function OrderFacts({ order }: { order: Order }) {
       </div>
       <div>
         <dt>Volume</dt>
-        <dd>{order.volumeM3} m³</dd>
+        <dd>{order.volumeM3} mÃ‚Â³</dd>
       </div>
     </dl>
   );
@@ -82,11 +83,15 @@ function OrderCard({ order }: { order: Order }) {
   );
 }
 export function StoreOrdersPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const search = searchParams.get('q') ?? '';
   const query = useQuery({
     queryKey: ['orders'],
     queryFn: ({ signal }) => fetchOrders(undefined, signal),
   });
-  const orders = query.data ?? [];
+  const orders = (query.data ?? []).filter((order) =>
+    `${order.sourceId} ${order.outlet?.name ?? ''}`.toLowerCase().includes(search.toLowerCase()),
+  );
   return (
     <>
       <PageHeader
@@ -101,6 +106,15 @@ export function StoreOrdersPage() {
             </Link>
           </Button>
         }
+      />
+      <Input
+        aria-label="Search store orders"
+        placeholder="Search orders or outlets..."
+        value={search}
+        onChange={(e) =>
+          setSearchParams(e.target.value ? { q: e.target.value } : {}, { replace: true })
+        }
+        className="store-order-search"
       />
       {query.isLoading ? (
         <div className="order-grid" aria-label="Loading orders">
@@ -181,85 +195,44 @@ function OrderForm({ onAccepted }: { onAccepted: (order: Order) => void }) {
     mutation.mutate();
   }
   return (
-    <form className="order-form" onSubmit={submit} noValidate>
+    <form className="order-form reference-order-form" onSubmit={submit} noValidate>
       {error && (
         <Alert title="Order not sent" tone="critical">
           {error}
         </Alert>
       )}
-      <fieldset>
-        <legend>Delivery request</legend>
-        <FormField
-          id="requestedDeliveryDate"
-          label="Requested delivery date"
-          description="The server will confirm the eligible intake run."
-          required
-        >
+      <FormField id="accessRequirement" label="Delivery access / entrance">
+        <Input
+          id="accessRequirement"
+          placeholder="Add the entrance, dock, or access instructions..."
+          value={form.accessRequirement}
+          onChange={(event) => update('accessRequirement', event.target.value)}
+        />
+      </FormField>
+      <div className="order-quantity-grid">
+        <FormField id="units" label="Units" required>
           <Input
-            id="requestedDeliveryDate"
-            type="date"
-            min={today()}
-            value={form.requestedDeliveryDate}
-            onChange={(event) => update('requestedDeliveryDate', event.target.value)}
-            required
+            id="units"
+            type="number"
+            min="1"
+            step="1"
+            inputMode="numeric"
+            value={form.units}
+            onChange={(e) => update('units', Number(e.target.value))}
           />
         </FormField>
-        <div className="form-grid">
-          <FormField id="requestedWindowOpen" label="Window opens">
-            <Input
-              id="requestedWindowOpen"
-              type="time"
-              value={form.requestedWindowOpen}
-              onChange={(event) => update('requestedWindowOpen', event.target.value)}
-            />
-          </FormField>
-          <FormField id="requestedWindowClose" label="Window closes">
-            <Input
-              id="requestedWindowClose"
-              type="time"
-              value={form.requestedWindowClose}
-              onChange={(event) => update('requestedWindowClose', event.target.value)}
-            />
-          </FormField>
-        </div>
-      </fieldset>
-      <fieldset>
-        <legend>Goods</legend>
-        <FormField id="temperature" label="Temperature handling" required>
-          <Select
-            id="temperature"
-            value={form.temperature}
-            onChange={(event) => update('temperature', event.target.value)}
-          >
-            <option value="AMBIENT">Ambient</option>
-            <option value="REEFER">Refrigerated / chilled</option>
-          </Select>
+        <FormField id="weightKg" label="Weight (kg)" required>
+          <Input
+            id="weightKg"
+            type="number"
+            min="0"
+            step="0.1"
+            inputMode="decimal"
+            value={form.weightKg}
+            onChange={(e) => update('weightKg', Number(e.target.value))}
+          />
         </FormField>
-        <div className="form-grid">
-          <FormField id="units" label="Units" required>
-            <Input
-              id="units"
-              type="number"
-              min="1"
-              step="1"
-              inputMode="numeric"
-              value={form.units}
-              onChange={(event) => update('units', Number(event.target.value))}
-            />
-          </FormField>
-          <FormField id="weightKg" label="Weight (kg)" required>
-            <Input
-              id="weightKg"
-              type="number"
-              min="0"
-              step="0.1"
-              inputMode="decimal"
-              value={form.weightKg}
-              onChange={(event) => update('weightKg', Number(event.target.value))}
-            />
-          </FormField>
-        </div>
-        <FormField id="volumeM3" label="Volume (m³)" required>
+        <FormField id="volumeM3" label="Volume (m3)" required>
           <Input
             id="volumeM3"
             type="number"
@@ -267,45 +240,97 @@ function OrderForm({ onAccepted }: { onAccepted: (order: Order) => void }) {
             step="0.1"
             inputMode="decimal"
             value={form.volumeM3}
-            onChange={(event) => update('volumeM3', Number(event.target.value))}
+            onChange={(e) => update('volumeM3', Number(e.target.value))}
           />
         </FormField>
-      </fieldset>
-      <fieldset>
-        <legend>
-          Access context <span className="legend-optional">Optional</span>
-        </legend>
-        <FormField id="accessRequirement" label="Access requirement">
+      </div>
+      <div className="form-grid">
+        <FormField id="requestedDeliveryDate" label="Requested delivery date" required>
           <Input
-            id="accessRequirement"
-            placeholder="e.g. rear entrance"
-            value={form.accessRequirement}
-            onChange={(event) => update('accessRequirement', event.target.value)}
+            id="requestedDeliveryDate"
+            type="date"
+            min={today()}
+            required
+            value={form.requestedDeliveryDate}
+            onChange={(e) => update('requestedDeliveryDate', e.target.value)}
           />
         </FormField>
-        <FormField id="mallWindow" label="Mall window">
-          <Textarea
-            id="mallWindow"
-            rows={3}
-            placeholder="Add a delivery access note"
-            value={form.mallWindow}
-            onChange={(event) => update('mallWindow', event.target.value)}
-          />
+        <FormField id="temperature" label="Temperature requirement" required>
+          <Select
+            id="temperature"
+            value={form.temperature}
+            onChange={(e) => update('temperature', e.target.value)}
+          >
+            <option value="AMBIENT">Ambient</option>
+            <option value="REEFER">Refrigerated / chilled</option>
+          </Select>
         </FormField>
-      </fieldset>
+      </div>
+      <Alert title="Order Cutoff Notice" tone="info">
+        The service checks the eligible intake run when you submit. Order acceptance does not
+        guarantee a scheduled delivery.
+      </Alert>
+      <details className="order-window">
+        <summary>Delivery time window (optional)</summary>
+        <div className="form-grid">
+          <FormField id="requestedWindowOpen" label="Window opens">
+            <Input
+              id="requestedWindowOpen"
+              type="time"
+              value={form.requestedWindowOpen}
+              onChange={(e) => update('requestedWindowOpen', e.target.value)}
+            />
+          </FormField>
+          <FormField id="requestedWindowClose" label="Window closes">
+            <Input
+              id="requestedWindowClose"
+              type="time"
+              value={form.requestedWindowClose}
+              onChange={(e) => update('requestedWindowClose', e.target.value)}
+            />
+          </FormField>
+        </div>
+      </details>
+      <FormField id="mallWindow" label="Delivery access notes (optional)">
+        <Textarea
+          id="mallWindow"
+          rows={2}
+          placeholder="Add mall delivery windows or special access instructions..."
+          value={form.mallWindow}
+          onChange={(e) => update('mallWindow', e.target.value)}
+        />
+      </FormField>
       <div className="order-form-actions">
-        <Button asChild variant="secondary">
-          <Link to="/store/orders">Cancel</Link>
+        <Button
+          variant="secondary"
+          type="button"
+          onClick={() => {
+            setForm({
+              requestedDeliveryDate: '',
+              temperature: 'AMBIENT',
+              units: 1,
+              weightKg: 0,
+              volumeM3: 0,
+              requestedWindowOpen: '',
+              requestedWindowClose: '',
+              accessRequirement: '',
+              mallWindow: '',
+            });
+            setError(undefined);
+          }}
+        >
+          Clear
         </Button>
         <Button type="submit" loading={mutation.isPending}>
-          <PackageCheck size={16} aria-hidden="true" />
+          <PackageCheck size={16} />
           {mutation.isPending ? 'Submitting order...' : 'Submit order'}
         </Button>
       </div>
     </form>
   );
 }
-export function StoreCreateOrderPage() {
+
+export function StoreCreateOrderPage({ embedded = false }: { embedded?: boolean } = {}) {
   const [accepted, setAccepted] = useState<Order>();
   if (accepted)
     return (
@@ -315,8 +340,12 @@ export function StoreCreateOrderPage() {
     <>
       <PageHeader
         eyebrow="STORE MANAGER / CREATE ORDER"
-        title="Create order"
-        description="Submit a distinct request for your authorized outlet. Acceptance does not mean the order is scheduled."
+        title={embedded ? 'Create a New Order' : 'Create order'}
+        description={
+          embedded
+            ? 'Tell us what you need and we will send it for planning.'
+            : 'Submit a distinct request for your authorized outlet. Acceptance does not mean the order is scheduled.'
+        }
       />
       <Card className="order-form-card">
         <div className="order-form-note">
@@ -330,6 +359,7 @@ export function StoreCreateOrderPage() {
           onAccepted={(order) => {
             setAccepted(order);
             void queryClient.invalidateQueries({ queryKey: ['orders'] });
+            void queryClient.invalidateQueries({ queryKey: ['operations-summary'] });
           }}
         />
       </Card>
@@ -400,38 +430,5 @@ export function StoreOrderDetailPage() {
         onRetry={() => void query.refetch()}
       />
     );
-  const order = query.data;
-  return (
-    <>
-      <PageHeader
-        eyebrow="STORE MANAGER / ORDER DETAIL"
-        title={order.sourceId}
-        description="Confirmed demand remains separate from later planning and delivery states."
-        actions={<Badge tone="success">{order.status}</Badge>}
-      />
-      <Card className="detail-card">
-        <OrderFacts order={order} />
-        <div className="detail-timeline">
-          <div>
-            <strong>Order received</strong>
-            <span>{formatDateTime(order.submittedAt)}</span>
-          </div>
-          <div>
-            <strong>Confirmed</strong>
-            <span>{formatDateTime(order.confirmedAt)}</span>
-          </div>
-          <div>
-            <strong>Scheduling pending</strong>
-            <span>No published arrival is available yet.</span>
-          </div>
-        </div>
-        <Button asChild variant="secondary">
-          <Link to="/store/orders">
-            <RefreshCw size={16} aria-hidden="true" />
-            Back to order history
-          </Link>
-        </Button>
-      </Card>
-    </>
-  );
+  return <OrderTracking order={query.data} />;
 }

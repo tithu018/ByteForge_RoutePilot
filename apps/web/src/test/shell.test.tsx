@@ -174,10 +174,8 @@ function renderWorkspace(path: string) {
 describe('workspace operations', () => {
   it('renders the dispatcher control tower from operations data', async () => {
     renderWorkspace('/dispatcher');
-    expect(
-      await screen.findByRole('heading', { name: 'Today’s delivery operation' }),
-    ).toBeVisible();
-    expect(screen.getByText('Latest exceptions')).toBeVisible();
+    expect(await screen.findByRole('heading', { name: 'Today’s Operations' })).toBeVisible();
+    expect(screen.getByText('Exceptions & Alerts')).toBeVisible();
   });
 
   it('renders the loader active load controls', async () => {
@@ -196,8 +194,10 @@ describe('workspace operations', () => {
 
   it('renders the store overview with the create-order action', async () => {
     renderWorkspace('/store');
-    expect(await screen.findByRole('heading', { name: 'Outlet delivery view' })).toBeVisible();
-    expect(screen.getAllByRole('link', { name: /Create order/ }).length).toBeGreaterThan(0);
+    expect(
+      await screen.findByRole('heading', { name: 'Keep Your Store Fully Stocked' }),
+    ).toBeVisible();
+    expect(screen.getByRole('button', { name: /Submit order/ })).toBeVisible();
   });
 });
 

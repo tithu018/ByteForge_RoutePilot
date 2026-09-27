@@ -179,3 +179,11 @@ All development accounts use `DemoOnly-ChangeMe-2026!`; these are not final judg
 5. Subsequent approved phases: reference data, orders/intake, planning/validation/deferrals, loading, driver delivery/receipt, dedicated offline reconciliation, operations/forecast presentation and competition packaging. Datathon remains separate.
 
 Do not import, commit or transmit competition datasets in this phase. Record significant later deviations from the submitted Designathon design in [the design handoff](docs/design/README.md). See [AI disclosure](docs/ai-disclosure.md).
+
+### Visual refresh
+
+The user-requested UI refresh adds a split-screen login, teal-accented workspaces, collapsible desktop navigation, password visibility, and order search/status filters. See [design departures](docs/design/README.md) for the presentation changes from the preserved baseline.
+
+### Reference-based Waypoint Control Tower UI
+
+The 27 September user-supplied references now define the interface: a photographic landing/login experience, blue/navy navigation, dispatcher dashboard and planning columns, loader checklist, mobile driver/sync screens, and store ordering/tracking. `/` is now the public landing page; `/login` opens account access. See [design departures and limitations](docs/design/README.md) and [local image assets](docs/design/reference-assets.md). Counts use the API; map panels are labelled schematics, not live GPS. Unsupported promotional statistics, OAuth sign-in, and fabricated ETAs are not represented as real capabilities.

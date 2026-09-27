@@ -20,9 +20,14 @@ function authHeaders(): Record<string, string> {
   const token = getSession()?.accessToken;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
-async function write(path: string, body: unknown, signal?: AbortSignal): Promise<unknown> {
+async function write(
+  path: string,
+  body: unknown,
+  signal?: AbortSignal,
+  method: 'POST' | 'PATCH' = 'POST',
+): Promise<unknown> {
   const response = await fetch(`${base}${path}`, {
-    method: 'POST',
+    method,
     signal: signal
       ? AbortSignal.any([signal, AbortSignal.timeout(5000)])
       : AbortSignal.timeout(5000),
@@ -261,4 +266,11 @@ export async function fetchHealth(signal?: AbortSignal): Promise<HealthResponse>
 }
 export async function fetchReadiness(signal?: AbortSignal): Promise<ReadinessResponse> {
   return readinessResponseSchema.parse(await read('/health/ready', signal));
+}
+
+export function validatePlan(id: string): Promise<unknown> {
+  return write(`/planning/plans/${encodeURIComponent(id)}/validate`, {});
+}
+export function publishPlan(id: string): Promise<unknown> {
+  return write(`/planning/plans/${encodeURIComponent(id)}/publish`, {}, undefined, 'PATCH');
 }

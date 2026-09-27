@@ -1,38 +1,226 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
-import { ArrowUpRight, ChevronDown, ChevronRight, Command, Menu, PanelLeftClose, Radio, Settings2, UserRound, WifiOff } from 'lucide-react';
-import { Badge, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@waypoint/ui';
+import {
+  Bell,
+  CalendarDays,
+  ChevronDown,
+  Headphones,
+  Menu,
+  Search,
+  Settings2,
+  UserRound,
+  Wifi,
+  WifiOff,
+} from 'lucide-react';
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+  SheetTrigger,
+} from '@waypoint/ui';
 import type { Workspace } from './workspaces';
 import { clearSession, getSession } from '../lib/auth';
-
-function subscribeConnection(callback: () => void) { window.addEventListener('online', callback); window.addEventListener('offline', callback); return () => { window.removeEventListener('online', callback); window.removeEventListener('offline', callback); }; }
-function ConnectionPlaceholder() {
-  const online = useSyncExternalStore(subscribeConnection, () => navigator.onLine, () => true);
-  return <div className="connection-reservation">{online ? <Radio size={15} aria-hidden="true" /> : <WifiOff size={15} aria-hidden="true" />}<span>{online ? 'Device connected' : 'Device offline'}<span className="connection-detail"> · Offline delivery support coming later</span></span></div>;
+import { WaypointBrand } from '../components/waypoint-brand';
+import { AccessHelp } from '../components/access-help';
+function subscribeConnection(callback: () => void) {
+  window.addEventListener('online', callback);
+  window.addEventListener('offline', callback);
+  return () => {
+    window.removeEventListener('online', callback);
+    window.removeEventListener('offline', callback);
+  };
 }
-function Brand() { return <div className="brand"><span className="brand-symbol" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 32 32"><path d="M4 9l6 15 6-12 6 12 6-15" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" /></svg></span><div><strong>{'<SOLUTION_NAME>'}</strong><span>DELIVERY OPERATIONS</span></div></div>; }
 function Navigation({ workspace, onNavigate }: { workspace: Workspace; onNavigate?: () => void }) {
-  return <nav aria-label={`${workspace.name} navigation`} className="workspace-nav">{workspace.navigation.map(({ path, label, icon: Icon }) => <NavLink end to={`/${workspace.id}${path ? `/${path}` : ''}`} key={path} onClick={onNavigate}><Icon size={18} aria-hidden="true" /><span>{label}</span><ChevronRight className="nav-active-arrow" size={14} aria-hidden="true" /></NavLink>)}</nav>;
+  return (
+    <nav className="workspace-nav" aria-label={`${workspace.name} navigation`}>
+      {workspace.navigation.map(({ path, label, icon: Icon }) => (
+        <NavLink
+          end
+          key={path}
+          to={`/${workspace.id}${path ? `/${path}` : ''}`}
+          onClick={onNavigate}
+        >
+          <Icon size={22} />
+          <span>{label}</span>
+        </NavLink>
+      ))}
+    </nav>
+  );
 }
 export function WorkspaceLayout({ workspace }: { workspace: Workspace }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [search, setSearch] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
   const session = getSession();
-  const previousPath = useRef(location.pathname);
   const main = useRef<HTMLElement>(null);
-  const current = workspace.navigation.find((item) => location.pathname === `/${workspace.id}${item.path ? `/${item.path}` : ''}`);
+  const previousPath = useRef(location.pathname);
+  const online = useSyncExternalStore(
+    subscribeConnection,
+    () => navigator.onLine,
+    () => true,
+  );
+  const current = workspace.navigation.find(
+    (item) => location.pathname === `/${workspace.id}${item.path ? `/${item.path}` : ''}`,
+  );
   useEffect(() => {
-    document.title = `${current?.label ?? 'Workspace'} · ${workspace.name} · Solution name`;
-    if (previousPath.current !== location.pathname) { main.current?.focus(); previousPath.current = location.pathname; }
-  }, [current?.label, location.pathname, workspace.name]);
+    document.title = `${current?.label ?? 'Workspace'} | Waypoint Control Tower`;
+    if (previousPath.current !== location.pathname) {
+      main.current?.focus();
+      previousPath.current = location.pathname;
+    }
+  }, [current?.label, location.pathname]);
   const field = workspace.id === 'driver' || workspace.id === 'loader';
-  return <div className={`app-shell ${field ? 'field-shell' : ''} workspace-${workspace.id}`}>
-    <a href="#main-content" className="skip-link">Skip to content</a>
-    <aside className="desktop-sidebar"><Brand /><div className="tenant-label"><span className="tenant-mark">W</span><div><strong>Waypoint Group</strong><span>{workspace.subtitle}</span></div></div><p className="nav-section-label">WORKSPACE</p><Navigation workspace={workspace} /><div className="sidebar-bottom"><Link to="/foundation"><Settings2 size={17} aria-hidden="true" />Foundation & components<ArrowUpRight size={14} aria-hidden="true" /></Link><div className="sidebar-build"><span className="build-dot" />Phase 2 · Development preview</div></div></aside>
-    <div className="shell-main"><header className="app-header"><div className="header-left"><Sheet open={menuOpen} onOpenChange={setMenuOpen}><SheetTrigger asChild><Button variant="ghost" size="icon" className="mobile-menu-button" aria-label="Open navigation"><Menu size={20} /></Button></SheetTrigger><SheetContent className="mobile-nav-sheet"><SheetTitle>{workspace.name} workspace</SheetTitle><SheetDescription>Authorized operational workspace.</SheetDescription><Navigation workspace={workspace} onNavigate={() => setMenuOpen(false)} /><Button asChild variant="secondary"><Link to="/foundation" onClick={() => setMenuOpen(false)}>Foundation & components</Link></Button></SheetContent></Sheet><PanelLeftClose size={18} aria-hidden="true" className="desktop-header-icon" /><nav aria-label="Breadcrumb" className="breadcrumbs"><span>{workspace.name}</span><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">{current?.label ?? 'Workspace'}</span></nav></div><div className="header-right"><Badge tone="neutral" className="header-phase">Authenticated</Badge><DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" className="user-menu"><span className="user-avatar"><UserRound size={16} aria-hidden="true" /></span><span className="user-menu-label">{session?.user.displayName ?? 'Account'}</span><ChevronDown size={14} aria-hidden="true" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuLabel className="menu-label">{session?.user.email ?? 'Authenticated account'}</DropdownMenuLabel><DropdownMenuItem onSelect={() => { clearSession(); navigate('/login', { replace: true }); }}>Sign out</DropdownMenuItem><DropdownMenuSeparator /><DropdownMenuItem asChild><Link to="/access-denied">Permission details</Link></DropdownMenuItem></DropdownMenuContent></DropdownMenu></div></header>
-    {workspace.id === 'driver' && <ConnectionPlaceholder />}
-    <main id="main-content" ref={main} tabIndex={-1} className="page-container"><Outlet context={workspace} /></main><footer className="app-footer"><span>Waypoint Group · Delivery operations</span><span><Command size={12} aria-hidden="true" /> Built from the approved design baseline</span></footer></div>
-    {field && <nav className="mobile-bottom-nav" aria-label={`${workspace.name} mobile navigation`}>{workspace.navigation.map(({ path, label, icon: Icon }) => <NavLink end key={path} to={`/${workspace.id}${path ? `/${path}` : ''}`}><Icon size={20} aria-hidden="true" /><span>{label}</span></NavLink>)}</nav>}
-  </div>;
+  const account = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="user-menu">
+          <span className="user-avatar">
+            <UserRound size={21} />
+          </span>
+          <span className="user-menu-label">
+            {session?.user.displayName ?? 'Account'}
+            <small>{workspace.name}</small>
+          </span>
+          <ChevronDown size={15} />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>{session?.user.email ?? 'Authorized workspace'}</DropdownMenuLabel>
+        <DropdownMenuItem
+          onSelect={() => {
+            clearSession();
+            navigate('/login', { replace: true });
+          }}
+        >
+          Sign out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+  return (
+    <div
+      className={`app-shell reference-shell workspace-${workspace.id} ${field ? 'field-shell' : ''}`}
+    >
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+      <aside className="desktop-sidebar">
+        <WaypointBrand light />
+        <Navigation workspace={workspace} />
+        <div className="sidebar-bottom">
+          <div className="sidebar-help">
+            <Headphones size={26} />
+            <div>
+              <strong>Need Help?</strong>
+              <AccessHelp label="Contact Support →" />
+            </div>
+          </div>
+          <Link to="/foundation">
+            <Settings2 size={20} />
+            Components & status
+          </Link>
+          <div className="sidebar-account">{account}</div>
+        </div>
+      </aside>
+      <div className="shell-main">
+        <header className="app-header">
+          <div className="header-left">
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="mobile-menu-button"
+                  aria-label="Open navigation"
+                >
+                  <Menu size={21} />
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="mobile-nav-sheet">
+                <SheetTitle>{workspace.name} workspace</SheetTitle>
+                <SheetDescription>Navigate your authorized workspace.</SheetDescription>
+                <Navigation workspace={workspace} onNavigate={() => setMenuOpen(false)} />
+              </SheetContent>
+            </Sheet>
+            <div className="mobile-brand">
+              <WaypointBrand light />
+            </div>
+            <form
+              className="header-search"
+              onSubmit={(e) => {
+                e.preventDefault();
+                navigate(
+                  `/${workspace.id}/${workspace.id === 'dispatcher' ? 'orders' : workspace.id === 'store' ? 'orders' : workspace.id === 'loader' ? 'active' : 'trip'}?q=${encodeURIComponent(search)}`,
+                );
+              }}
+            >
+              <Search size={18} />
+              <input
+                aria-label="Search workspace"
+                placeholder="Search orders or outlets..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </form>
+          </div>
+          <div className="header-right">
+            <span className="header-date">
+              <CalendarDays size={18} />
+              {new Intl.DateTimeFormat('en', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              }).format(new Date())}
+            </span>
+            <Button asChild variant="ghost" size="icon" aria-label="View issues">
+              <Link
+                to={`/${workspace.id}/${workspace.id === 'dispatcher' ? 'exceptions' : workspace.id === 'driver' ? 'sync' : 'issues'}`}
+              >
+                <Bell size={22} />
+              </Link>
+            </Button>
+            {account}
+          </div>
+        </header>
+        {workspace.id === 'store' && (
+          <nav className="store-top-nav" aria-label="Store shortcuts">
+            <WaypointBrand light />
+            {workspace.navigation.map((item) => (
+              <NavLink end key={item.path} to={`/store${item.path ? `/${item.path}` : ''}`}>
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        )}
+        {workspace.id === 'driver' && (
+          <div className={`driver-connection ${online ? '' : 'is-offline'}`}>
+            {online ? <Wifi size={15} /> : <WifiOff size={15} />}{' '}
+            {online ? 'Device online' : 'Device offline'}
+          </div>
+        )}
+        <main id="main-content" ref={main} tabIndex={-1} className="page-container">
+          <Outlet context={workspace} />
+        </main>
+      </div>
+      {field && (
+        <nav className="mobile-bottom-nav" aria-label={`${workspace.name} mobile navigation`}>
+          {workspace.navigation.map(({ path, label, icon: Icon }) => (
+            <NavLink end key={path} to={`/${workspace.id}${path ? `/${path}` : ''}`}>
+              <Icon size={23} />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+      )}
+    </div>
+  );
 }
