@@ -2383,34 +2383,10 @@ a {
 }
 /* Store dashboard and order tracking composition. */
 .workspace-store .desktop-sidebar {
-  width: 185px;
-  background: #fff;
-  color: #21395a;
-  padding-top: 98px;
-}
-.workspace-store .desktop-sidebar > .waypoint-brand {
-  display: none;
-}
-.workspace-store .desktop-sidebar .workspace-nav a {
-  color: #384b71;
-  padding-inline: 14px;
-  gap: 14px;
-  font-size: 12px;
-}
-.workspace-store .desktop-sidebar .workspace-nav a svg {
-  color: #314974;
-}
-.workspace-store .desktop-sidebar .workspace-nav a.active {
-  background: #e5f0ff;
-  color: #005dff;
-  box-shadow: none;
-}
-.workspace-store .desktop-sidebar .sidebar-help,
-.workspace-store .sidebar-account {
-  display: none;
+  width: 218px;
 }
 .workspace-store .shell-main {
-  margin-left: 185px;
+  margin-left: 218px;
 }
 .workspace-store .app-header {
   background: #031c36;
@@ -3894,4 +3870,131 @@ a {
       right center;
     background-repeat: no-repeat;
   }
+}
+
+/* ── Dispatcher workspace premium sidebar ── */
+.workspace-dispatcher .desktop-sidebar {
+  background:
+    linear-gradient(170deg, #031b34 40%, #031b3433 72%, #031b34ee),
+    url('/images/waypoint-highway.png') center bottom/auto 60% no-repeat;
+}
+.workspace-dispatcher .app-header {
+  background: linear-gradient(100deg, #061e38, #0a2a4e);
+  color: #d8e7ff;
+  border-color: #1c3f62;
+}
+.workspace-dispatcher .header-search {
+  background: #ffffff10;
+  border-color: #2a4d70;
+  color: #a9c0df;
+}
+.workspace-dispatcher .header-search input {
+  color: white;
+}
+.workspace-dispatcher .header-search input::placeholder {
+  color: #8ba6c8;
+}
+.workspace-dispatcher .header-search svg {
+  color: #6b96c4;
+}
+.workspace-dispatcher .user-menu {
+  color: white;
+}
+.workspace-dispatcher .header-date {
+  color: #8faed1;
+}
+.workspace-dispatcher .header-right > .ui-button {
+  color: #c0d8f4;
+}
+
+/* ── Driver workspace premium sidebar ── */
+.workspace-driver .desktop-sidebar {
+  background:
+    linear-gradient(170deg, #0a1e32 42%, #0a1e3230 75%, #0a1e32ee),
+    url('/images/waypoint-highway.png') 55% bottom/auto 55% no-repeat;
+}
+.workspace-driver .app-header {
+  background: linear-gradient(100deg, #0b2440, #0f3058);
+  color: #d4e5fc;
+  border-color: #1a3b5c;
+}
+.workspace-driver .header-search {
+  background: #ffffff10;
+  border-color: #2a4f72;
+  color: #a4bdd9;
+}
+.workspace-driver .header-search input {
+  color: white;
+}
+.workspace-driver .header-search input::placeholder {
+  color: #87a5c5;
+}
+.workspace-driver .header-search svg {
+  color: #6891bd;
+}
+.workspace-driver .user-menu {
+  color: white;
+}
+.workspace-driver .header-right > .ui-button {
+  color: #bdd4ef;
+}
+
+/* ── Store workspace premium sidebar ── */
+.workspace-store .desktop-sidebar {
+  background:
+    linear-gradient(170deg, #021830 40%, #02183044 72%, #021830ee),
+    url('/images/waypoint-store.png') center bottom/auto 60% no-repeat;
+  color: #c5d8f0;
+  padding-top: 25px;
+}
+.workspace-store .desktop-sidebar > .waypoint-brand {
+  display: flex;
+}
+.workspace-store .desktop-sidebar .workspace-nav a {
+  color: #b8cfea;
+  font-size: 13px;
+  padding-inline: 18px;
+  gap: 18px;
+}
+.workspace-store .desktop-sidebar .workspace-nav a svg {
+  color: #7eb4e4;
+}
+.workspace-store .desktop-sidebar .workspace-nav a.active {
+  background: linear-gradient(100deg, #07418d, #0b3873);
+  box-shadow: inset 3px 0 #0574ff;
+  color: white;
+}
+.workspace-store .desktop-sidebar .workspace-nav a.active svg {
+  color: #31aaff;
+}
+.workspace-store .desktop-sidebar .workspace-nav a:hover {
+  background: #0d3459;
+}
+.workspace-store .desktop-sidebar .sidebar-help {
+  display: flex;
+}
+.workspace-store .desktop-sidebar .sidebar-help svg {
+  color: #39a5ff;
+}
+.workspace-store .desktop-sidebar .sidebar-help strong {
+  color: #e4edf9;
+}
+.workspace-store .desktop-sidebar .sidebar-help button {
+  color: #43b0ff;
+}
+.workspace-store .sidebar-account {
+  display: block;
+}
+.workspace-store .sidebar-account .user-menu {
+  color: #dce9ff;
+}
+.workspace-store .sidebar-account .user-avatar {
+  background: #deecfa;
+  color: #163550;
+}
+.workspace-store .app-header .user-menu {
+  color: white;
+}
+.workspace-store .app-header .ui-button {
+  color: white;
 }
