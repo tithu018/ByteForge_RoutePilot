@@ -41,6 +41,38 @@ import {
   TripComplete,
   TripNotSynced,
 } from './driver';
+import {
+  CapacityForecast,
+  CaseResolved,
+  DeferralDecisionDialog,
+  DeferralLog,
+  DispatcherIssue,
+  DraftPlan,
+  FixedPlan,
+  LiveBoard,
+  MoveOutletDialog,
+  NeedsAttention,
+  OrderQueue,
+  PublishedPlan,
+  PublishReview,
+  PublishV2,
+  ReferenceData,
+  VehicleUnavailable,
+} from './dispatcher';
+import {
+  BeforeAmbient,
+  BeforeChilled,
+  ConnectionDrop,
+  FlagProblemDialog,
+  Loaded,
+  LoadingChecklist,
+  LoadingIssues,
+  LoadSummary,
+  PlanChanged,
+  ReassignedLoaded,
+  Reverify,
+  TripQueue,
+} from './loader';
 
 export default function App() {
   return (
@@ -84,6 +116,36 @@ export default function App() {
       <Route path="/driver/dr13" element={<TripNotSynced />} />
       <Route path="/driver/dr14" element={<DriverDisplay />} />
       <Route path="/driver/dr15" element={<DriveModeNight />} />
+
+      <Route path="/dispatcher/dp01" element={<OrderQueue />} />
+      <Route path="/dispatcher/dp02" element={<DraftPlan />} />
+      <Route path="/dispatcher/dp-o1" element={<MoveOutletDialog />} />
+      <Route path="/dispatcher/dp-o2" element={<DeferralDecisionDialog />} />
+      <Route path="/dispatcher/dp03" element={<FixedPlan />} />
+      <Route path="/dispatcher/dp04" element={<PublishReview />} />
+      <Route path="/dispatcher/dp05" element={<PublishedPlan />} />
+      <Route path="/dispatcher/dp06" element={<VehicleUnavailable />} />
+      <Route path="/dispatcher/dp07" element={<PublishV2 />} />
+      <Route path="/dispatcher/dp08" element={<LiveBoard />} />
+      <Route path="/dispatcher/dp09" element={<NeedsAttention />} />
+      <Route path="/dispatcher/dp10" element={<DispatcherIssue />} />
+      <Route path="/dispatcher/dp11" element={<CaseResolved />} />
+      <Route path="/dispatcher/dp12" element={<DeferralLog />} />
+      <Route path="/dispatcher/dp13" element={<CapacityForecast />} />
+      <Route path="/dispatcher/dp14" element={<ReferenceData />} />
+
+      <Route path="/loader/ld01" element={<TripQueue />} />
+      <Route path="/loader/ld02" element={<BeforeAmbient />} />
+      <Route path="/loader/ld03" element={<LoadingChecklist />} />
+      <Route path="/loader/ld-o1" element={<FlagProblemDialog />} />
+      <Route path="/loader/ld04" element={<LoadSummary />} />
+      <Route path="/loader/ld05" element={<Loaded />} />
+      <Route path="/loader/ld06" element={<BeforeChilled />} />
+      <Route path="/loader/ld07" element={<ConnectionDrop />} />
+      <Route path="/loader/ld08" element={<PlanChanged />} />
+      <Route path="/loader/ld09" element={<Reverify />} />
+      <Route path="/loader/ld10" element={<ReassignedLoaded />} />
+      <Route path="/loader/ld11" element={<LoadingIssues />} />
       <Route path="*" element={<Navigate to="/store/sm01" replace />} />
     </Routes>
   );

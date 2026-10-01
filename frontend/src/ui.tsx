@@ -1,22 +1,28 @@
 import type { ElementType, ReactNode } from 'react';
 import { Link } from 'react-router';
 import {
+  BarChart3,
   Bell,
+  BookOpen,
   Check,
   ClipboardList,
   Clock3,
   Grid2X2,
   History,
+  ListChecks,
   LogOut,
   PackageCheck,
   RefreshCw,
   Settings as SettingsIcon,
   SlidersHorizontal,
   Store,
+  TriangleAlert,
   Truck,
 } from 'lucide-react';
 import logoWhite from '../images/logo-white.png';
 import storeManagerImage from '../images/store-manager.webp';
+import dispatcherImage from '../images/dispatcher.webp';
+import loaderImage from '../images/loader.webp';
 
 export type Tone = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -137,4 +143,26 @@ export function RadioCard({ title, description, checked = false, children }: { t
 
 export function Timeline({ items }: { items: Array<[string, string, 'done' | 'current' | 'todo']> }) {
   return <div className="timeline">{items.map(([title, description, state]) => <div className={`timeline-item ${state}`} key={title}><span className="timeline-marker">{state === 'done' ? '✓' : ''}</span><div><strong>{title}</strong><small>{description}</small></div></div>)}</div>;
+}
+
+const dispatcherNav = [
+  ['plan', SlidersHorizontal, 'Plan', '/dispatcher/dp01'],
+  ['board', Truck, 'Live Board', '/dispatcher/dp08'],
+  ['attention', TriangleAlert, 'Needs Attention · 3', '/dispatcher/dp09'],
+  ['deferrals', RefreshCw, 'Deferral Log', '/dispatcher/dp12'],
+  ['forecast', BarChart3, 'Capacity Forecast', '/dispatcher/dp13'],
+  ['reference', BookOpen, 'Reference Data', '/dispatcher/dp14'],
+] as const;
+
+const loaderNav = [
+  ['queue', ClipboardList, 'Trip queue', '/loader/ld01'],
+  ['active', PackageCheck, 'Active load', '/loader/ld03'],
+  ['issues', TriangleAlert, 'Loading issues', '/loader/ld11'],
+] as const;
+
+export function OperationsShell({ role, active, children, badge }: { role: 'Dispatcher' | 'Loader'; active: string; children: ReactNode; badge?: string }) {
+  const isDispatcher = role === 'Dispatcher';
+  const items = isDispatcher ? dispatcherNav : loaderNav;
+  const illustration = isDispatcher ? dispatcherImage : loaderImage;
+  return <div className="store-workspace operations-workspace"><aside className="store-sidebar operations-sidebar"><div className="sidebar-brand"><img src={logoWhite} alt="" /><strong>Waypoint</strong></div><nav aria-label={`${role} navigation`}>{items.map(([id, Icon, label, to]) => <Link className={cx('sidebar-link', active === id && 'active')} to={to} key={id}><Icon size={19} strokeWidth={1.8} /><span>{label}</span></Link>)}</nav><img className="operations-illustration" src={illustration} alt="" /><div className="outlet-card"><strong>Peliyagoda depot</strong><span>{isDispatcher ? '38 vehicles · 49 Fresh · 16 Style · 10 Tech outlets' : 'Loading dock · shared terminal'}</span></div><button className="signout" type="button"><LogOut size={18} />Sign out</button></aside><div className="store-main"><header className="store-header"><div className="store-location"><PackageCheck size={18} /><strong>Peliyagoda</strong><span>{isDispatcher ? 'Tue 24 Mar 2026 · planning Wed 25 Mar' : 'Loading for Wed 25 Mar 2026'}</span></div><div className="store-user"><StatusChip tone={badge?.includes('closed') ? 'neutral' : 'success'}>{badge ?? (isDispatcher ? 'Draft v1' : 'Online')}</StatusChip><Bell size={21} /><span className="avatar">{isDispatcher ? 'DS' : 'LD'}</span><div><strong>{role}</strong><small>{isDispatcher ? 'Tue 24 Mar · 16:05' : 'Wed 25 Mar · 03:16'}</small></div></div></header><div className="store-content operations-content">{children}</div></div></div>;
 }

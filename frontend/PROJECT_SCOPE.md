@@ -72,7 +72,14 @@ N0VA page 37 explains how the brand variants work; it is reference material rath
 | 81 | DR14 | Day/night display setting |
 | 82 | DR15 | Night theme |
 
-Dispatcher and Loader screens belong to the other teammate. Shared foundation/component changes should be coordinated with the team lead.
+## Expanded implementation scope
+
+Sanjeevan explicitly authorised implementation of Ananthasagaran's frontend screens after the original Store Manager and Driver work was completed. The frontend now also includes:
+
+- Dispatcher desktop: N0VA pages 38–53 — `DP01–DP14`, `DP-O1`, `DP-O2`
+- Loader desktop: N0VA pages 54–65 — `LD01–LD11`, `LD-O1`
+
+This expansion remains frontend-only. Shared foundation/component changes should still follow the common Waypoint design system.
 
 ## Frontend rules remembered from the design
 
